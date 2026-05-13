@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import Icon from './components/Icon'
-import { DashboardMock, AdminMock } from './components/DashboardMock'
 import './leaguru.css'
 
 const ACCENT = { accent: '#ef7f2c', accentSoft: '#fde7d4', accentDeep: '#c9601a', accentInk: '#ffffff' }
@@ -99,14 +98,18 @@ function Hero() {
           </div>
           <div className="hero-visual reveal">
             <div className="dash-wrap">
-              <DashboardMock />
+              <img
+                src="/screenshots/front_boxed.png"
+                alt="リーグ公式サイト プレビュー"
+                style={{ width: '100%', borderRadius: 12, boxShadow: '0 24px 64px rgba(0,0,0,.22)', border: '1px solid rgba(0,0,0,.08)' }}
+              />
               <div className="float-card notif">
                 <div className="ic"><Icon name="bell" size={16} /></div>
-                <div><div className="ttl">試合結果を更新</div><div className="sub">スターズ 7 - 3 タイガース</div></div>
+                <div><div className="ttl">試合結果を更新</div><div className="sub">ジャンキース 0 - 2 プレジャー</div></div>
               </div>
               <div className="float-card score">
                 <div className="ic b"><Icon name="trophy" size={16} /></div>
-                <div><div className="ttl">首位 スターズ</div><div className="sub">10勝2敗 · 勝率 .833</div></div>
+                <div><div className="ttl">首位 西宮シャドウズ</div><div className="sub">4勝1敗 · 勝点12</div></div>
                 <div className="score-num">1位</div>
               </div>
             </div>
@@ -173,7 +176,13 @@ function AdminShowcase() {
           <h2 className="section-title">かんたんな管理画面で、すべて完結。</h2>
           <p className="section-lead">試合結果の入力からお知らせの発信まで、専門知識のいらない画面で運営できます。日々の運営にかかる時間を、できる限り短くする設計です。</p>
         </div>
-        <div className="admin-showcase-mock"><AdminMock /></div>
+        <div className="admin-showcase-mock">
+          <img
+            src="/screenshots/admin_game_input.png"
+            alt="試合結果入力画面"
+            style={{ width: '100%', borderRadius: 12, boxShadow: '0 24px 64px rgba(0,0,0,.22)', border: '1px solid rgba(0,0,0,.1)' }}
+          />
+        </div>
         <div className="admin-callouts">
           {callouts.map((c, i) => (
             <div className="admin-callout" key={i}>
@@ -181,6 +190,62 @@ function AdminShowcase() {
               <div><h4>{c.title}</h4><p>{c.desc}</p></div>
             </div>
           ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function LayoutShowcase() {
+  const [active, setActive] = useState(0)
+  const layouts = [
+    { id: 'boxed',    label: 'ボックス型',   img: '/screenshots/front_boxed.png',    desc: '浮き上がるカードデザイン。モダンで見やすい構成。' },
+    { id: 'standard', label: 'スタンダード', img: '/screenshots/front_standard.png', desc: 'シンプルで落ち着いた横広レイアウト。' },
+    { id: 'fullwide', label: 'フルワイド',   img: '/screenshots/front_fullwide.png', desc: '斜めの大胆なヒーローとスクロールティッカー。' },
+    { id: 'sidebar',  label: 'サイドバー',   img: '/screenshots/front_sidebar.png',  desc: '左固定ナビで、選手がページを素早く移動できる。' },
+  ]
+  return (
+    <section className="layout-showcase" id="layouts" style={{ background: 'var(--navy-900, #0a0f1e)', padding: '88px 0' }}>
+      <div className="container">
+        <div className="section-head reveal" style={{ marginBottom: 48 }}>
+          <span className="eyebrow" style={{ color: 'var(--accent)' }}>4 Layouts</span>
+          <h2 className="section-title" style={{ color: '#fff' }}>デザインは4パターンから選択。</h2>
+          <p className="section-lead" style={{ color: 'rgba(255,255,255,.55)' }}>管理画面からワンクリックで切り替え。いつでも変更でき、即日公開されます。</p>
+        </div>
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginBottom: 32, flexWrap: 'wrap' }}>
+          {layouts.map((l, i) => (
+            <button
+              key={l.id}
+              onClick={() => setActive(i)}
+              style={{
+                padding: '8px 20px', borderRadius: 9999, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: 'none',
+                background: active === i ? 'var(--accent)' : 'rgba(255,255,255,.1)',
+                color: active === i ? '#fff' : 'rgba(255,255,255,.6)',
+                transition: 'all .2s',
+              }}
+            >{l.label}</button>
+          ))}
+        </div>
+        <div className="reveal" style={{ position: 'relative', maxWidth: 1100, margin: '0 auto' }}>
+          <img
+            key={layouts[active].img}
+            src={layouts[active].img}
+            alt={layouts[active].label}
+            style={{
+              width: '100%', borderRadius: 14,
+              boxShadow: '0 32px 80px rgba(0,0,0,.5)',
+              border: '1px solid rgba(255,255,255,.08)',
+              display: 'block',
+            }}
+          />
+          <div style={{
+            position: 'absolute', bottom: 20, left: 20,
+            background: 'rgba(0,0,0,.7)', backdropFilter: 'blur(8px)',
+            borderRadius: 10, padding: '10px 16px', color: '#fff',
+          }}>
+            <div style={{ fontWeight: 700, fontSize: 14 }}>{layouts[active].label}</div>
+            <div style={{ fontSize: 12, opacity: .7, marginTop: 2 }}>{layouts[active].desc}</div>
+          </div>
         </div>
       </div>
     </section>
@@ -568,6 +633,7 @@ export default function App() {
         <Hero />
         <Features />
         <AdminShowcase />
+        <LayoutShowcase />
         <UseCases />
         <HowItWorks />
         <Testimonials />
