@@ -689,7 +689,7 @@ export default function App() {
         <HowItWorks />
         {/* <Testimonials /> — ユーザー獲得後に実際の声に差し替えて復活 */}
         <Pricing />
-        <News />
+        {/* <News /> — コンテンツができたら復活 */}
         <FAQ />
         <ContactCTA />
         <ApplicationForm />
