@@ -123,12 +123,12 @@ function Hero() {
 function Features() {
   const items = [
     { ic: 'trophy',    title: '順位表',           desc: '勝敗を入力するだけで自動集計。常に最新の順位表が公開されます。',             tag: '01' },
-    { ic: 'calendar',  title: '日程管理',         desc: '試合日程の登録・変更・公開がドラッグ操作だけで完結します。',                 tag: '02' },
+    { ic: 'calendar',  title: '日程管理',         desc: '試合日程はフォームから数クリックで登録・変更。変更内容はすぐ公式サイトへ反映されます。', tag: '02' },
     { ic: 'chart',     title: '成績管理',         desc: '打撃・投手成績は入力するだけ。個人ランキングも自動で表示。',                 tag: '03' },
-    { ic: 'megaphone', title: 'お知らせ',         desc: 'リーグからの連絡やレギュレーション変更を、ウェブで一斉発信。',               tag: '04' },
+    { ic: 'megaphone', title: 'お知らせ',         desc: 'ルール変更・雨天中止など、リーグからの連絡をウェブで一斉に発信できます。',   tag: '04' },
     { ic: 'mobile',    title: 'スマホ対応',       desc: '選手・ご家族はスマホで順位や日程をいつでも確認できます。',                   tag: '05' },
     { ic: 'settings',  title: '管理画面',         desc: '専門知識は不要。普段使いのブラウザだけで運営いただけます。',                 tag: '06' },
-    { ic: 'spark',     title: 'トーナメント対応', desc: '春季・秋季大会などのグループ予選＋決勝ブラケットもLeaguruひとつで完結。',   tag: '07' },
+    { ic: 'spark',     title: 'トーナメント対応', desc: '春季・秋季大会などのグループ予選＋決勝トーナメント表の管理もLeaguruひとつで完結。', tag: '07' },
   ]
   return (
     <section className="features" id="features">
@@ -156,8 +156,8 @@ function Features() {
 function TournamentShowcase() {
   const [tab, setTab] = useState<'bracket' | 'group'>('bracket')
   const points = [
-    { ic: 'trophy', title: 'グループステージ＋決勝トーナメント', desc: '予選グループ戦から決勝ブラケットまで、ひとつの画面で管理。対戦結果を入力するたびにリアルタイム更新されます。' },
-    { ic: 'spark',  title: 'ウェブ抽選でその場でブラケット確定', desc: 'ボタンひとつでグループ分けを自動抽選。Excelやくじ引きは不要です。' },
+    { ic: 'trophy', title: 'グループ予選＋決勝トーナメント表', desc: '予選のグループ戦から決勝の対戦表まで、ひとつの画面で管理。結果を入力するたびにリアルタイム更新されます。' },
+    { ic: 'spark',  title: 'ウェブ抽選でその場で組み合わせ確定', desc: 'ボタンひとつでグループ分けを自動抽選。Excelやくじ引きは不要です。' },
     { ic: 'mobile', title: '参加チームがスマホで確認できる',     desc: '公式サイトURLをLINEで共有するだけ。選手・スタッフが試合状況を即座に確認できます。' },
   ]
   return (
@@ -170,7 +170,7 @@ function TournamentShowcase() {
           <h2 className="section-title" style={{ color: '#fff' }}>トーナメント大会にも、対応しています。</h2>
           <p className="section-lead" style={{ color: 'rgba(255,255,255,0.65)' }}>
             春季・秋季大会などのトーナメント運営もLeaguruひとつで完結。<br />
-            グループ予選から決勝ブラケットまで、自動で集計・公開します。
+            グループ予選から決勝トーナメント表まで、自動で集計・公開します。
           </p>
         </div>
 
@@ -207,8 +207,8 @@ function TournamentShowcase() {
 function AdminShowcase() {
   const callouts = [
     { ic: 'ball',      title: 'スコアを入力するだけ', desc: '打数・安打・打点を入力すれば、個人成績ランキングも順位表も自動で更新されます。' },
-    { ic: 'calendar',  title: '日程はドラッグ操作',   desc: 'カレンダー上で試合をドラッグして登録・移動。変更があれば公式サイトに即反映されます。' },
-    { ic: 'megaphone', title: 'お知らせを一斉発信',   desc: 'レギュレーション変更や雨天中止の連絡を、選手・ご家族にウェブで一斉発信できます。' },
+    { ic: 'calendar',  title: '日程は簡単入力',       desc: '試合日程はフォームから数クリックで登録・変更。変更はすぐに公式サイトへ反映されます。' },
+    { ic: 'megaphone', title: 'お知らせを一斉発信',   desc: 'ルール変更や雨天中止など、リーグからの連絡を選手・ご家族にウェブで一斉発信できます。' },
   ]
   return (
     <section className="admin-showcase" id="admin">
@@ -505,7 +505,6 @@ function FAQ() {
   const items = [
     { q: '専門的な知識は必要ですか？', a: 'いいえ、不要です。普段スマートフォンやパソコンをお使いの方であれば、どなたでもご利用いただけます。管理画面はフォームに沿って入力する形式で、HTMLやプログラミングの知識は一切必要ありません。' },
     { q: 'スマホから管理できますか？', a: 'はい、可能です。管理画面・公開サイトともにスマートフォンに完全対応しています。試合直後にスマホからスコアを入力する、といった使い方をされている運営者の方が多いです。' },
-    { q: '既存のデータは移行できますか？', a: 'ExcelやGoogleスプレッドシートで管理されている過去データの移行サポートを承っています。お申し込み後の初期設定時に、データをお送りいただければサポート担当が無料で取り込みを代行いたします。' },
     { q: '途中で解約できますか？', a: 'はい、いつでも解約いただけます。年額制ですが、ご利用期間の残月分について日割りでのご返金には対応しておりませんので、その点のみご了承ください。' },
     { q: '複数のリーグを管理できますか？', a: '複数リーグを管理される場合は、リーグごとにお申し込みいただく形となります。連盟様向けに、複数リーグをまとめて管理できるプランも準備中です。お気軽にご相談ください。' },
   ]
@@ -655,7 +654,7 @@ function Footer() {
             <p>野球リーグの公式サイト作成・運営管理サービス。草野球から少年野球、社会人リーグまで、全国で導入いただいています。</p>
           </div>
           <div className="foot-col"><h4>サービス</h4><ul><li><a href="#features">機能一覧</a></li><li><a href="#pricing">料金</a></li><li><a href="#faq">よくあるご質問</a></li><li><a href="#news">ニュース</a></li></ul></div>
-          <div className="foot-col"><h4>サポート</h4><ul><li><a href="/contact">お問い合わせ</a></li><li><a href="#">ヘルプセンター</a></li><li><a href="#">運営フロー</a></li><li><a href="#">データ移行サポート</a></li></ul></div>
+          <div className="foot-col"><h4>サポート</h4><ul><li><a href="/contact">お問い合わせ</a></li><li><a href="#">ヘルプセンター</a></li><li><a href="#">運営フロー</a></li></ul></div>
           <div className="foot-col"><h4>会社情報</h4><ul><li><a href="#">運営者情報</a></li><li><a href="/terms">利用規約</a></li><li><a href="/privacy">プライバシーポリシー</a></li><li><a href="/tokusho">特定商取引法に基づく表記</a></li></ul></div>
         </div>
         <div className="foot-bottom">
