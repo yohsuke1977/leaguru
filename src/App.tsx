@@ -375,36 +375,7 @@ function HowItWorks() {
   )
 }
 
-function Testimonials() {
-  const tests = [
-    { stars: 5, body: '「順位表のExcelをLINEに貼り直す作業」が無くなったのが一番大きい。試合後にすぐ反映されるので、選手も納得感を持って次の試合に臨めます。', name: '佐藤 健一さん', role: '多摩川草野球リーグ 代表', initial: 'S' },
-    { stars: 5, body: '保護者の方々から「試合の予定がひと目でわかる」「子どもの成績が確認できて嬉しい」と好評です。連盟としても運営しやすくなりました。', name: '鈴木 美咲さん', role: '城南少年野球連盟 事務局長', initial: 'M' },
-    { stars: 5, body: '年額1.5万円は、運営に費やしていた時間を考えると本当に安い。年に一度の更新で済むので、引き継ぎもスムーズです。', name: '田中 浩二さん', role: '中央社会人リーグ 運営委員', initial: 'K' },
-  ]
-  return (
-    <section className="testimonials">
-      <div className="container">
-        <div className="section-head reveal">
-          <span className="eyebrow">Testimonials</span>
-          <h2 className="section-title">運営者の声</h2>
-          <p className="section-lead">実際にLeaguruをお使いいただいているリーグ運営者の皆さまから、ご感想をいただきました。</p>
-        </div>
-        <div className="test-grid">
-          {tests.map((t, i) => (
-            <div className="testimonial reveal" key={i} style={{ transitionDelay: `${i * 100}ms` }}>
-              <div className="stars">{'★'.repeat(t.stars)}</div>
-              <div className="body">「{t.body}」</div>
-              <div className="who">
-                <div className="avatar">{t.initial}</div>
-                <div><div className="who-name">{t.name}</div><div className="who-role">{t.role}</div></div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
+/* Testimonials — ユーザー獲得後に実際の声で復活。コードは memory/project_lp_hidden_sections.md に保存済み */
 
 function Pricing() {
   const features = [
