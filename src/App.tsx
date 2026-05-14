@@ -47,7 +47,7 @@ function Nav() {
           <a href="#faq">よくある質問</a>
         </nav>
         <div className="nav-cta">
-          <a className="btn btn-ghost desktop-only" href="#contact" style={{ padding: '10px 16px', fontSize: 13.5 }}>お問い合わせ</a>
+          <a className="btn btn-ghost desktop-only" href="/contact" style={{ padding: '10px 16px', fontSize: 13.5 }}>お問い合わせ</a>
           <a className="btn btn-primary desktop-only" href="#apply" style={{ padding: '10px 16px', fontSize: 13.5 }}>申し込む</a>
           <button className={'nav-burger' + (menuOpen ? ' open' : '')} aria-label={menuOpen ? 'メニューを閉じる' : 'メニューを開く'} aria-expanded={menuOpen} onClick={() => setMenuOpen(o => !o)}>
             <span /><span /><span />
@@ -64,11 +64,11 @@ function Nav() {
             <a href="#pricing" onClick={close}>料金</a>
             <a href="#news" onClick={close}>ニュース</a>
             <a href="#faq" onClick={close}>よくあるご質問</a>
-            <a href="#contact" onClick={close}>お問い合わせ</a>
+            <a href="/contact" onClick={close}>お問い合わせ</a>
           </nav>
           <div className="mobile-cta">
             <a className="btn btn-primary btn-lg" href="#apply" onClick={close}>いますぐ申し込む <Icon name="arrow-right" size={16} /></a>
-            <a className="btn btn-ghost btn-lg" href="#contact" onClick={close}>お問い合わせ</a>
+            <a className="btn btn-ghost btn-lg" href="/contact" onClick={close}>お問い合わせ</a>
           </div>
           <div className="mobile-foot"><small>年額 ¥15,000(税込) · 追加料金なし</small></div>
         </div>
@@ -535,58 +535,20 @@ function FAQ() {
   )
 }
 
-function ContactForm() {
-  const [form, setForm] = useState({ name: '', email: '', subject: 'general', message: '' })
-  const [submitted, setSubmitted] = useState(false)
-  const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
-  const submit = (e: React.FormEvent) => { e.preventDefault(); setSubmitted(true) }
+function ContactCTA() {
   return (
-    <section className="contact" id="contact">
+    <section className="contact-cta" id="contact">
       <div className="container">
-        <div className="contact-grid">
-          <div className="contact-info">
+        <div className="contact-cta-inner reveal">
+          <div>
             <span className="eyebrow">Contact</span>
             <h2>お問い合わせ</h2>
-            <p>機能や導入方法、お見積りに関するご質問など、お気軽にお寄せください。申し込み前のご相談・資料請求も歓迎しています。担当者より2営業日以内にご返信いたします。</p>
-            <div className="contact-channels">
-              <div className="contact-channel">
-                <span className="ic"><Icon name="megaphone" size={16} /></span>
-                <div><b>メールでのお問い合わせ</b><small>support@leaguru.jp(平日 10:00 - 18:00)</small></div>
-              </div>
-              <div className="contact-channel">
-                <span className="ic"><Icon name="heart" size={16} /></span>
-                <div><b>導入相談・デモのご希望</b><small>個別オンライン相談(30分)を無料で承ります</small></div>
-              </div>
-            </div>
+            <p>機能・料金・導入相談など、お気軽にお寄せください。<br />担当者より2営業日以内にご返信いたします。</p>
           </div>
-          <div className="contact-card">
-            {submitted ? (
-              <div className="form-success">
-                <Icon name="check" size={28} />
-                <div style={{ fontSize: 16, marginTop: 4 }}>お問い合わせを受け付けました</div>
-                <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink-2)' }}>2営業日以内にご返信いたします。</div>
-              </div>
-            ) : (
-              <form onSubmit={submit}>
-                <h3 style={{ margin: '0 0 14px', fontSize: 17, color: 'var(--navy-900)' }}>お問い合わせフォーム</h3>
-                <div className="form-row"><label>お名前 <span className="req">必須</span></label><input type="text" required value={form.name} onChange={e => set('name', e.target.value)} placeholder="例:山田 太郎" /></div>
-                <div className="form-row"><label>メールアドレス <span className="req">必須</span></label><input type="email" required value={form.email} onChange={e => set('email', e.target.value)} placeholder="example@league.jp" /></div>
-                <div className="form-row">
-                  <label>お問い合わせ種別 <span className="req">必須</span></label>
-                  <select required value={form.subject} onChange={e => set('subject', e.target.value)}>
-                    <option value="general">一般的なご質問</option>
-                    <option value="demo">デモ・導入相談</option>
-                    <option value="function">機能・仕様について</option>
-                    <option value="migration">データ移行について</option>
-                    <option value="other">その他</option>
-                  </select>
-                </div>
-                <div className="form-row"><label>お問い合わせ内容 <span className="req">必須</span></label><textarea required value={form.message} onChange={e => set('message', e.target.value)} placeholder="ご質問・ご相談内容をご記入ください" /></div>
-                <button type="submit" className="btn btn-primary btn-lg form-submit">送信する <Icon name="arrow-right" size={18} /></button>
-                <p className="form-note">ご入力情報は<a href="#" style={{ textDecoration: 'underline' }}>プライバシーポリシー</a>に基づき適切に取り扱います</p>
-              </form>
-            )}
-          </div>
+          <a className="btn btn-primary btn-lg" href="/contact">
+            お問い合わせフォームへ
+            <Icon name="arrow-right" size={18} />
+          </a>
         </div>
       </div>
     </section>
@@ -673,7 +635,7 @@ function CTAStrip() {
         <p>年額 ¥15,000(税込)、追加料金なし。まずはお気軽にご相談ください。</p>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
           <a className="btn btn-primary btn-lg" href="#apply">いますぐ申し込む</a>
-          <a className="btn btn-secondary btn-lg" href="#contact">お問い合わせ</a>
+          <a className="btn btn-secondary btn-lg" href="/contact">お問い合わせ</a>
         </div>
       </div>
     </section>
@@ -693,8 +655,8 @@ function Footer() {
             <p>野球リーグの公式サイト作成・運営管理サービス。草野球から少年野球、社会人リーグまで、全国で導入いただいています。</p>
           </div>
           <div className="foot-col"><h4>サービス</h4><ul><li><a href="#features">機能一覧</a></li><li><a href="#pricing">料金</a></li><li><a href="#faq">よくあるご質問</a></li><li><a href="#news">ニュース</a></li></ul></div>
-          <div className="foot-col"><h4>サポート</h4><ul><li><a href="#contact">お問い合わせ</a></li><li><a href="#">ヘルプセンター</a></li><li><a href="#">運営フロー</a></li><li><a href="#">データ移行サポート</a></li></ul></div>
-          <div className="foot-col"><h4>会社情報</h4><ul><li><a href="#">運営者情報</a></li><li><a href="#">利用規約</a></li><li><a href="#">プライバシーポリシー</a></li><li><a href="#">特定商取引法に基づく表記</a></li></ul></div>
+          <div className="foot-col"><h4>サポート</h4><ul><li><a href="/contact">お問い合わせ</a></li><li><a href="#">ヘルプセンター</a></li><li><a href="#">運営フロー</a></li><li><a href="#">データ移行サポート</a></li></ul></div>
+          <div className="foot-col"><h4>会社情報</h4><ul><li><a href="#">運営者情報</a></li><li><a href="/terms">利用規約</a></li><li><a href="/privacy">プライバシーポリシー</a></li><li><a href="/tokusho">特定商取引法に基づく表記</a></li></ul></div>
         </div>
         <div className="foot-bottom">
           <small>© 2026 Leaguru. All rights reserved.</small>
@@ -730,7 +692,7 @@ export default function App() {
         <Pricing />
         <News />
         <FAQ />
-        <ContactForm />
+        <ContactCTA />
         <ApplicationForm />
         <CTAStrip />
       </main>

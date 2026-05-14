@@ -2060,3 +2060,28 @@ section {
 }
 .ts-point h4 { margin: 0 0 5px; font-size: 13.5px; font-weight: 700; color: #fff; line-height: 1.5; }
 .ts-point p  { margin: 0; font-size: 12.5px; color: rgba(255,255,255,0.60); line-height: 1.75; }
+
+/* ── Contact CTA (LP内の簡易コンタクトブロック) ── */
+.contact-cta {
+  background: var(--cream);
+  border-top: 1px solid var(--line);
+  padding: 64px 0;
+}
+.contact-cta-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+.contact-cta-inner .eyebrow { margin-bottom: 8px; }
+.contact-cta-inner h2 { font-size: 26px; font-weight: 800; color: var(--navy-900); margin: 0 0 8px; }
+.contact-cta-inner p  { margin: 0; color: var(--ink-2); font-size: 14.5px; line-height: 1.7; }
+@media (max-width: 640px) {
+  .contact-cta-inner { flex-direction: column; align-items: flex-start; }
+}
+
+/* ── Legal pages ── */
+.legal-body ul { padding-left: 20px; margin: 10px 0; }
+.legal-body li { margin-bottom: 6px; }
+.legal-body a  { color: var(--accent-deep); }
