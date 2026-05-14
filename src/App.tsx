@@ -122,12 +122,13 @@ function Hero() {
 
 function Features() {
   const items = [
-    { ic: 'trophy',    title: '順位表',     desc: '勝敗を入力するだけで自動集計。常に最新の順位表が公開されます。',     tag: '01' },
-    { ic: 'calendar',  title: '日程管理',   desc: '試合日程の登録・変更・公開がドラッグ操作だけで完結します。',         tag: '02' },
-    { ic: 'chart',     title: '成績管理',   desc: '打撃・投手成績は入力するだけ。個人ランキングも自動で表示。',         tag: '03' },
-    { ic: 'megaphone', title: 'お知らせ',   desc: 'リーグからの連絡やレギュレーション変更を、ウェブで一斉発信。',       tag: '04' },
-    { ic: 'mobile',    title: 'スマホ対応', desc: '選手・ご家族はスマホで順位や日程をいつでも確認できます。',           tag: '05' },
-    { ic: 'settings',  title: '管理画面',   desc: '専門知識は不要。普段使いのブラウザだけで運営いただけます。',         tag: '06' },
+    { ic: 'trophy',    title: '順位表',           desc: '勝敗を入力するだけで自動集計。常に最新の順位表が公開されます。',             tag: '01' },
+    { ic: 'calendar',  title: '日程管理',         desc: '試合日程の登録・変更・公開がドラッグ操作だけで完結します。',                 tag: '02' },
+    { ic: 'chart',     title: '成績管理',         desc: '打撃・投手成績は入力するだけ。個人ランキングも自動で表示。',                 tag: '03' },
+    { ic: 'megaphone', title: 'お知らせ',         desc: 'リーグからの連絡やレギュレーション変更を、ウェブで一斉発信。',               tag: '04' },
+    { ic: 'mobile',    title: 'スマホ対応',       desc: '選手・ご家族はスマホで順位や日程をいつでも確認できます。',                   tag: '05' },
+    { ic: 'settings',  title: '管理画面',         desc: '専門知識は不要。普段使いのブラウザだけで運営いただけます。',                 tag: '06' },
+    { ic: 'spark',     title: 'トーナメント対応', desc: '春季・秋季大会などのグループ予選＋決勝ブラケットもLeaguruひとつで完結。',   tag: '07' },
   ]
   return (
     <section className="features" id="features">
@@ -144,6 +145,57 @@ function Features() {
               <div className="ic"><Icon name={it.ic} size={26} /></div>
               <h3>{it.title}</h3>
               <p>{it.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function TournamentShowcase() {
+  const [tab, setTab] = useState<'bracket' | 'group'>('bracket')
+  const points = [
+    { ic: 'trophy', title: 'グループステージ＋決勝トーナメント', desc: '予選グループ戦から決勝ブラケットまで、ひとつの画面で管理。対戦結果を入力するたびにリアルタイム更新されます。' },
+    { ic: 'spark',  title: 'ウェブ抽選でその場でブラケット確定', desc: 'ボタンひとつでグループ分けを自動抽選。Excelやくじ引きは不要です。' },
+    { ic: 'mobile', title: '参加チームがスマホで確認できる',     desc: '公式サイトURLをLINEで共有するだけ。選手・スタッフが試合状況を即座に確認できます。' },
+  ]
+  return (
+    <section className="tournament-showcase" id="tournament">
+      <div className="container">
+        <div className="section-head reveal">
+          <span className="eyebrow" style={{ background: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.8)' }}>
+            <span style={{ background: 'rgba(255,255,255,0.6)' }} />Tournament
+          </span>
+          <h2 className="section-title" style={{ color: '#fff' }}>トーナメント大会にも、対応しています。</h2>
+          <p className="section-lead" style={{ color: 'rgba(255,255,255,0.65)' }}>
+            春季・秋季大会などのトーナメント運営もLeaguruひとつで完結。<br />
+            グループ予選から決勝ブラケットまで、自動で集計・公開します。
+          </p>
+        </div>
+
+        <div className="ts-tabs reveal">
+          <button className={'ts-tab' + (tab === 'bracket' ? ' active' : '')} onClick={() => setTab('bracket')}>決勝トーナメント表</button>
+          <button className={'ts-tab' + (tab === 'group'   ? ' active' : '')} onClick={() => setTab('group')}>グループステージ</button>
+        </div>
+
+        <div className="ts-screen reveal">
+          <div className="ts-browser-bar">
+            <span className="ts-dot" /><span className="ts-dot" /><span className="ts-dot" />
+            <span className="ts-url">demo.leaguru.jp / 2026年春季大会</span>
+          </div>
+          <img
+            src={tab === 'bracket' ? '/screenshots/tournament_bracket.png' : '/screenshots/tournament_group.png'}
+            alt={tab === 'bracket' ? '決勝トーナメント画面' : 'グループステージ画面'}
+            className="ts-img"
+          />
+        </div>
+
+        <div className="ts-points">
+          {points.map((p, i) => (
+            <div className="ts-point reveal" key={i} style={{ transitionDelay: `${i * 80}ms` }}>
+              <div className="ts-point-ic"><Icon name={p.ic} size={22} /></div>
+              <div><h4>{p.title}</h4><p>{p.desc}</p></div>
             </div>
           ))}
         </div>
@@ -668,6 +720,7 @@ export default function App() {
       <main>
         <Hero />
         <Features />
+        <TournamentShowcase />
         <AdminShowcase />
         <LayoutShowcase />
         <ColorPresetShowcase />
