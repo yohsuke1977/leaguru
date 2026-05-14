@@ -464,42 +464,6 @@ function Pricing() {
   )
 }
 
-function News() {
-  const posts = [
-    { cat: 'アップデート', date: '2026.05.08', title: '個人ランキングに「打点」「盗塁」の項目を追加しました', excerpt: 'ご要望の多かった2項目を順位表に表示できるようになりました。設定画面から有効化できます。', ic: 'spark' },
-    { cat: 'コラム',       date: '2026.04.22', title: '草野球リーグ運営者が語る「続く運営、続かない運営」', excerpt: '10年続く草野球リーグの代表3名にインタビュー。長く運営を続けるためのコツを伺いました。', ic: 'team' },
-    { cat: 'お知らせ',     date: '2026.04.01', title: '2026年シーズン開幕キャンペーンを開始しました', excerpt: '5月末までにお申し込みいただいたリーグ様には、初期設定を無料でサポートいたします。', ic: 'bell' },
-  ]
-  return (
-    <section className="news" id="news">
-      <div className="container">
-        <div className="news-head reveal">
-          <div>
-            <span className="eyebrow">News &amp; Blog</span>
-            <h2>ニュース・コラム</h2>
-            <p className="lead">アップデート情報や、リーグ運営に役立つコラムをお届けしています。</p>
-          </div>
-          <a className="btn btn-ghost" href="#" style={{ padding: '10px 18px', fontSize: 13.5 }}>すべての記事を見る <Icon name="arrow-right" size={14} /></a>
-        </div>
-        <div className="news-grid">
-          {posts.map((p, i) => (
-            <article className={'news-card reveal'} key={i} style={{ transitionDelay: `${i * 80}ms` }}>
-              <div className={`news-thumb alt-${i + 1}`}>
-                <div className="pat" />
-                <Icon name={p.ic} size={48} stroke={1.2} style={{ opacity: 0.5 }} />
-              </div>
-              <div className="body">
-                <div className="meta"><span className="cat">{p.cat}</span><span>{p.date}</span></div>
-                <h3>{p.title}</h3>
-                <p>{p.excerpt}</p>
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
 
 function FAQ() {
   const items = [
