@@ -105,11 +105,11 @@ function Hero() {
               />
               <div className="float-card notif">
                 <div className="ic"><Icon name="bell" size={16} /></div>
-                <div><div className="ttl">試合結果を更新</div><div className="sub">ジャンキース 0 - 2 プレジャー</div></div>
+                <div><div className="ttl">試合結果を更新</div><div className="sub">府中ブルーウェーブ 3 - 1 多摩川タイガース</div></div>
               </div>
               <div className="float-card score">
                 <div className="ic b"><Icon name="trophy" size={16} /></div>
-                <div><div className="ttl">首位 西宮シャドウズ</div><div className="sub">4勝1敗 · 勝点12</div></div>
+                <div><div className="ttl">首位 セントラル・スターズ</div><div className="sub">4勝0敗 · 勝点12</div></div>
                 <div className="score-num">1位</div>
               </div>
             </div>
