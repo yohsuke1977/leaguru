@@ -115,16 +115,6 @@ function Hero() {
             </div>
           </div>
         </div>
-        <div className="logo-strip reveal">
-          <div className="logo-strip-label">全国の野球リーグでご利用いただいています（一部・順不同）</div>
-          <div className="logos">
-            <div className="lg"><span className="ic">多</span>多摩川草野球リーグ</div>
-            <div className="lg"><span className="ic">JK</span>城南少年野球連盟</div>
-            <div className="lg"><span className="ic">N</span>中央社会人リーグ</div>
-            <div className="lg"><span className="ic">OB</span>三田会OBリーグ</div>
-            <div className="lg"><span className="ic">湘</span>湘南ベイサイドリーグ</div>
-          </div>
-        </div>
       </div>
     </section>
   )
@@ -329,25 +319,25 @@ function ColorPresetShowcase() {
 
 function UseCases() {
   const cases = [
-    { ic: 'team',   title: '草野球リーグ',         quote: '毎週の順位表をLINEで共有するのが大変だった。リーグルにしてからは自動で更新されるので、運営の負担がぐっと減りました。', from: '— 多摩川草野球リーグ 代表' },
-    { ic: 'kids',   title: '少年野球リーグ',       quote: '保護者の方から「子どもの試合日程がわかりやすい」と好評です。連絡漏れも減りました。', from: '— 城南少年野球連盟 事務局' },
-    { ic: 'office', title: '社会人・企業内リーグ', quote: '社内全部署から参加するリーグの管理が楽に。Slack共有用のURLが一つあれば済むようになりました。', from: '— 中央社会人リーグ 運営担当' },
-    { ic: 'heart',  title: 'OB・サークルリーグ',  quote: '卒業後もみんなで野球を続けたい。そんな小規模リーグでも気軽に始められる価格でありがたい。', from: '— 三田会OBリーグ 幹事' },
+    { ic: 'team',   title: '草野球リーグ',         desc: '順位表・成績・日程を一か所にまとめて、LINEグループへの転記作業から解放されます。' },
+    { ic: 'kids',   title: '少年野球リーグ',       desc: '保護者への試合日程の周知や、子どもの個人成績の公開が簡単に行えます。' },
+    { ic: 'office', title: '社会人・企業内リーグ', desc: '参加者全員がスマホからリアルタイムで順位と結果を確認。Slackなどへの共有もURLひとつです。' },
+    { ic: 'heart',  title: 'OB・サークルリーグ',  desc: '数チームの小規模リーグでも使いやすい価格設定。立ち上げから公開まで最短5分です。' },
   ]
   return (
     <section className="usecases" id="usecases">
       <div className="container">
         <div className="section-head reveal">
           <span className="eyebrow">Use Cases</span>
-          <h2 className="section-title">こんなリーグに、選ばれています。</h2>
-          <p className="section-lead">草野球から少年野球、社会人リーグやOB会まで。規模や運営スタイルを問わず、全国のリーグでお使いいただけます。</p>
+          <h2 className="section-title">こんなリーグに、ぴったりです。</h2>
+          <p className="section-lead">草野球から少年野球、社会人リーグやOB会まで。規模や運営スタイルを問わず使えます。</p>
         </div>
         <div className="uc-grid">
           {cases.map((c, i) => (
             <div className="uc reveal" key={i} style={{ transitionDelay: `${i * 80}ms` }}>
               <div className="uc-illust"><Icon name={c.ic} size={26} /></div>
               <h3>{c.title}</h3>
-              <div className="quote">{c.quote}<span className="from">{c.from}</span></div>
+              <p style={{ fontSize: 14, color: 'var(--muted)', lineHeight: 1.7, margin: 0 }}>{c.desc}</p>
             </div>
           ))}
         </div>
@@ -712,7 +702,7 @@ export default function App() {
         <ColorPresetShowcase />
         <UseCases />
         <HowItWorks />
-        <Testimonials />
+        {/* <Testimonials /> — ユーザー獲得後に実際の声に差し替えて復活 */}
         <Pricing />
         <News />
         <FAQ />
