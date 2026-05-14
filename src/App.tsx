@@ -199,10 +199,10 @@ function AdminShowcase() {
 function LayoutShowcase() {
   const [active, setActive] = useState(0)
   const layouts = [
-    { id: 'boxed',    label: 'ボックス型',   img: '/screenshots/front_boxed.png',    desc: '浮き上がるカードデザイン。モダンで見やすい構成。' },
-    { id: 'standard', label: 'スタンダード', img: '/screenshots/front_standard.png', desc: 'シンプルで落ち着いた横広レイアウト。' },
-    { id: 'fullwide', label: 'フルワイド',   img: '/screenshots/front_fullwide.png', desc: '斜めの大胆なヒーローとスクロールティッカー。' },
-    { id: 'sidebar',  label: 'サイドバー',   img: '/screenshots/front_sidebar.png',  desc: '左固定ナビで、選手がページを素早く移動できる。' },
+    { id: 'boxed',    label: 'ボックス型',   img: '/screenshots/front_boxed.png',    desc: '浮き上がるカードデザイン。モダンで見やすい構成。（Forest カラー）' },
+    { id: 'standard', label: 'スタンダード', img: '/screenshots/front_standard.png', desc: 'シンプルで落ち着いた横広レイアウト。（Navy カラー）' },
+    { id: 'fullwide', label: 'フルワイド',   img: '/screenshots/front_fullwide.png', desc: '斜めの大胆なヒーローとスクロールティッカー。（Crimson カラー）' },
+    { id: 'sidebar',  label: 'サイドバー',   img: '/screenshots/front_sidebar.png',  desc: '左固定ナビで、選手がページを素早く移動できる。（Slate カラー）' },
   ]
   return (
     <section className="layout-showcase" id="layouts" style={{ background: 'var(--navy-900, #0a0f1e)', padding: '88px 0' }}>
@@ -210,7 +210,7 @@ function LayoutShowcase() {
         <div className="section-head reveal" style={{ marginBottom: 48 }}>
           <span className="eyebrow" style={{ color: 'var(--accent)' }}>4 Layouts</span>
           <h2 className="section-title" style={{ color: '#fff' }}>デザインは4パターンから選択。</h2>
-          <p className="section-lead" style={{ color: 'rgba(255,255,255,.55)' }}>管理画面からワンクリックで切り替え。いつでも変更でき、即日公開されます。</p>
+          <p className="section-lead" style={{ color: 'rgba(255,255,255,.55)' }}>管理画面からワンクリックで切り替え。配色もフォントも自由に変えられます。</p>
         </div>
         <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginBottom: 32, flexWrap: 'wrap' }}>
           {layouts.map((l, i) => (
@@ -245,6 +245,81 @@ function LayoutShowcase() {
           }}>
             <div style={{ fontWeight: 700, fontSize: 14 }}>{layouts[active].label}</div>
             <div style={{ fontSize: 12, opacity: .7, marginTop: 2 }}>{layouts[active].desc}</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function ColorPresetShowcase() {
+  const presets = [
+    { img: '/screenshots/front_boxed.png',    label: 'Forest',  colors: ['#0c3020', '#1a6b3a', '#b8921a'] },
+    { img: '/screenshots/front_standard.png', label: 'Navy',    colors: ['#0d1f3c', '#1a3d6b', '#c8102e'] },
+    { img: '/screenshots/front_fullwide.png', label: 'Crimson', colors: ['#6b0000', '#a00000', '#f0e0c0'] },
+    { img: '/screenshots/front_sidebar.png',  label: 'Slate',   colors: ['#1e2a38', '#2c4a62', '#3aad6e'] },
+  ]
+  return (
+    <section style={{ background: '#f4f6fa', padding: '88px 0' }}>
+      <div className="container">
+        <div className="section-head reveal" style={{ marginBottom: 52 }}>
+          <span className="eyebrow">Color & Style</span>
+          <h2 className="section-title">チームカラーで、リーグの個性を出す。</h2>
+          <p className="section-lead">6色プリセット収録 + カスタムカラー対応。フォントも3種類から選べます。<br />すべて管理画面からワンクリックで即時反映。</p>
+        </div>
+
+        {/* 4配色の比較サムネイル */}
+        <div className="reveal" style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: 20,
+          marginBottom: 56,
+        }}>
+          {presets.map(p => (
+            <div key={p.label}>
+              <img
+                src={p.img}
+                alt={p.label}
+                style={{
+                  width: '100%', borderRadius: 10,
+                  boxShadow: '0 8px 24px rgba(0,0,0,.10)',
+                  border: '1px solid rgba(0,0,0,.06)',
+                  display: 'block',
+                }}
+              />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 10 }}>
+                {p.colors.map(c => (
+                  <span key={c} style={{
+                    width: 14, height: 14, borderRadius: '50%',
+                    background: c, flexShrink: 0,
+                    border: '1px solid rgba(0,0,0,.12)',
+                  }} />
+                ))}
+                <span style={{ fontSize: 13, fontWeight: 600, color: '#444', marginLeft: 2 }}>{p.label}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* 管理画面のカラー設定スクショ */}
+        <div className="reveal" style={{ maxWidth: 880, margin: '0 auto', position: 'relative' }}>
+          <img
+            src="/screenshots/admin_colors.png"
+            alt="管理画面のカラー・レイアウト設定"
+            style={{
+              width: '100%', borderRadius: 14,
+              boxShadow: '0 16px 48px rgba(0,0,0,.12)',
+              border: '1px solid rgba(0,0,0,.07)',
+              display: 'block',
+            }}
+          />
+          <div style={{
+            position: 'absolute', bottom: 20, right: 20,
+            background: 'rgba(10,15,30,.82)', backdropFilter: 'blur(8px)',
+            borderRadius: 10, padding: '10px 18px', color: '#fff',
+          }}>
+            <div style={{ fontWeight: 700, fontSize: 13 }}>管理画面から設定→即公開</div>
+            <div style={{ fontSize: 11, opacity: .65, marginTop: 2 }}>レイアウト・カラー・フォントをまとめて管理</div>
           </div>
         </div>
       </div>
@@ -634,6 +709,7 @@ export default function App() {
         <Features />
         <AdminShowcase />
         <LayoutShowcase />
+        <ColorPresetShowcase />
         <UseCases />
         <HowItWorks />
         <Testimonials />
