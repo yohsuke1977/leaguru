@@ -13,8 +13,8 @@ export default function SiteFooter() {
             </div>
             <p>野球リーグの公式サイト作成・運営管理サービス。草野球から少年野球、社会人リーグまで、全国で導入いただいています。</p>
           </div>
-          <div className="foot-col"><h4>サービス</h4><ul><li><a href="/#features">機能一覧</a></li><li><a href="/#pricing">料金</a></li><li><a href="/#faq">よくあるご質問</a></li><li><a href="/blog">ブログ</a></li></ul></div>
-          <div className="foot-col"><h4>サポート</h4><ul><li><a href="/contact">お問い合わせ</a></li><li><a href="/#apply">お申し込み</a></li></ul></div>
+          <div className="foot-col"><h4>サービス</h4><ul><li><a href="/#features">機能一覧</a></li><li><a href="/#pricing">料金</a></li><li><a href="/blog">ブログ</a></li></ul></div>
+          <div className="foot-col"><h4>サポート</h4><ul><li><a href="/contact">お問い合わせ</a></li><li><a href="/#faq">よくあるご質問</a></li><li><a href="/#how">使い方</a></li></ul></div>
           <div className="foot-col"><h4>会社情報</h4><ul><li><a href="/operator">開発者について</a></li><li><a href="/terms">利用規約</a></li><li><a href="/privacy">プライバシーポリシー</a></li><li><a href="/tokusho">特定商取引法に基づく表記</a></li></ul></div>
         </div>
         <div className="foot-bottom">
