@@ -2,13 +2,13 @@ import LegalLayout from './LegalLayout'
 
 export default function TokushoPage() {
   const rows: [string, React.ReactNode][] = [
-    ['販売業者',         '※ご自身のお名前または屋号を記載'],
-    ['代表者',           '※代表者名を記載'],
-    ['所在地',           '※住所を記載（大阪府）'],
-    ['電話番号',         '※電話番号を記載（お問い合わせはメールが確実です）'],
+    ['販売業者',         'Zen Works'],
+    ['代表者',           '山下 陽介'],
+    ['所在地',           '〒651-0084 兵庫県神戸市中央区磯辺通1丁目1番18号カサベラ国際プラザビル707号室'],
+    ['電話番号',         <a href="/contact" style={{ color: 'inherit' }}>お問い合わせフォームよりご連絡ください</a>],
     ['メールアドレス',   <a href="mailto:support@leaguru.jp">support@leaguru.jp</a>],
     ['販売URL',          <a href="https://leaguru.jp">https://leaguru.jp</a>],
-    ['販売価格',         '¥15,000（税込）/ 1リーグ・年'],
+    ['販売価格',         '¥18,000（税込）/ 1リーグ・年'],
     ['代金以外の費用',   '通信費・デバイス費用はお客様のご負担となります'],
     ['支払い方法',       'クレジットカード（Visa / Mastercard / American Express） / Apple Pay / Google Pay'],
     ['支払い時期',       'お申し込み時に即時決済'],
@@ -19,11 +19,7 @@ export default function TokushoPage() {
 
   return (
     <LegalLayout title="特定商取引法に基づく表記">
-      <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 40 }}>最終更新日：2026年5月14日</p>
-
-      <p style={{ fontSize: 13, background: '#fff8f0', border: '1px solid #fde7d4', borderRadius: 8, padding: '12px 16px', color: '#7a4010', marginBottom: 32 }}>
-        ※「※〜を記載」となっている箇所は実際の情報に差し替えてください。
-      </p>
+      <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 40 }}>最終更新日：2026年5月18日</p>
 
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
         <tbody>

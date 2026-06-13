@@ -3,7 +3,7 @@ import LegalLayout from './LegalLayout'
 export default function TermsPage() {
   return (
     <LegalLayout title="利用規約">
-      <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 40 }}>最終更新日：2026年5月14日</p>
+      <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 40 }}>最終更新日：2026年5月19日</p>
 
       <LegalSection title="第1条（適用）">
         <p>本規約は、Leaguru（以下「当サービス」）の利用に関する条件を定めるものです。ユーザーは本規約に同意したうえでサービスをご利用ください。</p>
@@ -19,7 +19,7 @@ export default function TermsPage() {
       </LegalSection>
 
       <LegalSection title="第3条（料金および支払い）">
-        <p>利用料金は年額15,000円（税込）です。決済はStripeを通じたクレジットカード払いにより行います。支払い完了後の返金は原則として承っておりませんが、当サービスの重大な瑕疵による場合はこの限りではありません。</p>
+        <p>利用料金は年額18,000円（税込）です。初回は30日間の無料トライアル期間を設けており、トライアル期間中は料金が発生しません。トライアル終了後、自動的に有料プランへ移行し年額料金が請求されます。決済はStripeを通じたクレジットカード払いにより行います。支払い完了後の返金は原則として承っておりませんが、当サービスの重大な瑕疵による場合はこの限りではありません。</p>
       </LegalSection>
 
       <LegalSection title="第4条（禁止事項）">
@@ -50,7 +50,7 @@ export default function TermsPage() {
       </LegalSection>
 
       <LegalSection title="第9条（準拠法・管轄裁判所）">
-        <p>本規約は日本法に準拠します。当サービスに関する紛争については、大阪地方裁判所を第一審の専属的合意管轄裁判所とします。</p>
+        <p>本規約は日本法に準拠します。当サービスに関する紛争については、神戸地方裁判所を第一審の専属的合意管轄裁判所とします。</p>
       </LegalSection>
     </LegalLayout>
   )

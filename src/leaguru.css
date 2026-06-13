@@ -208,24 +208,9 @@ section {
   color: var(--navy-900);
   letter-spacing: 0.02em;
 }
-.brand-mark {
-  width: 32px;
-  height: 32px;
-  border-radius: 9px;
-  background: var(--navy-900);
-  display: grid;
-  place-items: center;
-  color: #fff;
-  position: relative;
-  overflow: hidden;
-}
-.brand-mark::after {
-  /* baseball seam */
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 50% 130%, var(--accent) 0 28%, transparent 29%);
-  opacity: .45;
+.brand-mark-svg {
+  display: block;
+  flex-shrink: 0;
 }
 .brand-text {
   display: flex;
@@ -1642,6 +1627,8 @@ section {
 }
 @media (max-width: 880px) {
   .form-grid { grid-template-columns: 1fr; gap: 36px; }
+  .form-card { padding: 24px 20px; }
+  .form-submit { font-size: 14px; white-space: normal; line-height: 1.4; padding: 14px 16px; }
 }
 .form-section .section-title { color: #fff; }
 .form-section .section-lead { color: rgba(255,255,255,0.75); }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Icon from './components/Icon'
 import './leaguru.css'
 
@@ -36,7 +36,21 @@ function Nav() {
     <header className={'nav' + (scrolled ? ' scrolled' : '')}>
       <div className="container nav-inner">
         <a className="brand" href="#top" onClick={close}>
-          <div className="brand-mark"><Icon name="ball" size={18} stroke={1.8} /></div>
+          <svg className="brand-mark-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="36" height="36">
+            <defs>
+              <radialGradient id="nav-glow" cx="50%" cy="100%" r="60%">
+                <stop offset="0%" stopColor="#ef7f2c" stopOpacity="0.55"/>
+                <stop offset="100%" stopColor="#ef7f2c" stopOpacity="0"/>
+              </radialGradient>
+            </defs>
+            <rect width="64" height="64" rx="16" fill="#0c1f3d"/>
+            <rect width="64" height="64" rx="16" fill="url(#nav-glow)"/>
+            <g transform="translate(14, 14) scale(1.5)">
+              <circle cx="12" cy="12" r="9" fill="none" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M5 8c4 2 10 2 14 0" fill="none" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M5 16c4-2 10-2 14 0" fill="none" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+            </g>
+          </svg>
           <div className="brand-text"><span className="en">Leaguru</span><span className="jp">リーグル</span></div>
         </a>
         <nav className="nav-links">
@@ -70,7 +84,7 @@ function Nav() {
             <a className="btn btn-primary btn-lg" href="#apply" onClick={close}>いますぐ申し込む <Icon name="arrow-right" size={16} /></a>
             <a className="btn btn-ghost btn-lg" href="/contact" onClick={close}>お問い合わせ</a>
           </div>
-          <div className="mobile-foot"><small>年額 ¥15,000(税込) · 追加料金なし</small></div>
+          <div className="mobile-foot"><small>年額 ¥18,000(税込) · 追加料金なし</small></div>
         </div>
       </div>
     </header>
@@ -88,10 +102,10 @@ function Hero() {
             <p className="hero-sub">順位表・成績・日程・お知らせ。<br />リーグの公式サイトが、今日から持てる。</p>
             <div className="hero-actions">
               <a className="btn btn-primary btn-lg" href="#apply">いますぐ申し込む <Icon name="arrow-right" size={18} /></a>
-              <a className="btn btn-ghost btn-lg" href="#how"><Icon name="play" size={14} /> デモを見る(準備中)</a>
+              <a className="btn btn-ghost btn-lg" href="https://demo.leaguru.jp" target="_blank" rel="noopener noreferrer"><Icon name="play" size={14} /> デモを見る</a>
             </div>
             <div className="hero-stats">
-              <div className="hero-stat"><div className="num">¥15,000<small>/年</small></div><div className="lbl">明朗な年額料金</div></div>
+              <div className="hero-stat"><div className="num">¥18,000<small>/年</small></div><div className="lbl">明朗な年額料金</div></div>
               <div className="hero-stat"><div className="num">5<small>分</small></div><div className="lbl">開設までの時間</div></div>
               <div className="hero-stat"><div className="num">0<small>円</small></div><div className="lbl">初期・追加費用</div></div>
             </div>
@@ -129,6 +143,7 @@ function Features() {
     { ic: 'mobile',    title: 'スマホ対応',       desc: '選手・ご家族はスマホで順位や日程をいつでも確認できます。',                   tag: '05' },
     { ic: 'settings',  title: '管理画面',         desc: '専門知識は不要。普段使いのブラウザだけで運営いただけます。',                 tag: '06' },
     { ic: 'spark',     title: 'トーナメント対応', desc: '春季・秋季大会などのグループ予選＋決勝トーナメント表の管理もLeaguruひとつで完結。', tag: '07' },
+    { ic: 'globe',     title: '独自ドメイン対応', desc: '既存のドメイン（例: sbl-kobe.com）をそのまま使えます。追加料金なし・設定はサポートが対応します。', tag: '08' },
   ]
   return (
     <section className="features" id="features">
@@ -209,6 +224,7 @@ function AdminShowcase() {
     { ic: 'ball',      title: 'スコアを入力するだけ', desc: '打数・安打・打点を入力すれば、個人成績ランキングも順位表も自動で更新されます。' },
     { ic: 'calendar',  title: '日程は簡単入力',       desc: '試合日程はフォームから数クリックで登録・変更。変更はすぐに公式サイトへ反映されます。' },
     { ic: 'megaphone', title: 'お知らせを一斉発信',   desc: 'ルール変更や雨天中止など、リーグからの連絡を選手・ご家族にウェブで一斉発信できます。' },
+    { ic: 'settings',  title: 'チーム管理者へ権限委譲', desc: '各チームの担当者に管理者権限を招待で付与。試合結果の入力を分担できます。リーグ管理者が承認するまで公開されません。' },
   ]
   return (
     <section className="admin-showcase" id="admin">
@@ -431,9 +447,9 @@ function HowItWorks() {
 
 function Pricing() {
   const features = [
-    'リーグ専用の公式サイト', '順位表・成績の自動集計', '試合日程・お知らせ機能',
+    '30日間無料トライアル', 'リーグ専用の公式サイト', '順位表・成績の自動集計', '試合日程・お知らせ機能',
     '管理画面（チーム数無制限）', 'スマートフォン完全対応', 'メールサポート',
-    '独自URL（leaguru.jp/◯◯）', '年1回の機能アップデート',
+    '専用URL（leaguru.jp/◯◯）＋独自ドメイン対応', '年1回の機能アップデート',
   ]
   return (
     <section className="pricing" id="pricing">
@@ -446,7 +462,7 @@ function Pricing() {
         <div className="price-card reveal">
           <span className="price-badge">スタンダードプラン</span>
           <h3>Leaguru リーグサイト</h3>
-          <div className="price-amount"><span className="yen">¥</span>15,000<span className="per">/ 年</span></div>
+          <div className="price-amount"><span className="yen">¥</span>18,000<span className="per">/ 年</span></div>
           <div className="price-tax">税込・1リーグあたり</div>
           <div className="price-features">
             {features.map((f, i) => (
@@ -456,7 +472,7 @@ function Pricing() {
           <a className="btn btn-primary btn-lg" href="#apply" style={{ minWidth: 240 }}>いますぐ申し込む <Icon name="arrow-right" size={18} /></a>
           <div className="form-note" style={{ marginTop: 18, color: 'var(--muted)' }}>
             <Icon name="lock" size={12} style={{ verticalAlign: 'middle', marginRight: 4 }} />
-            お申し込み後、Stripeの安全な決済ページへご案内します
+            30日間無料トライアル付き。お申し込み後、Stripeの安全な決済ページへご案内します
           </div>
         </div>
       </div>
@@ -467,9 +483,11 @@ function Pricing() {
 
 function FAQ() {
   const items = [
+    { q: '無料トライアルはありますか？', a: 'はい、30日間の無料トライアルをご用意しています。お申し込み時にクレジットカードを登録いただきますが、30日以内に解約いただければ費用は一切かかりません。トライアル期間中もすべての機能をお使いいただけます。' },
     { q: '専門的な知識は必要ですか？', a: 'いいえ、不要です。普段スマートフォンやパソコンをお使いの方であれば、どなたでもご利用いただけます。管理画面はフォームに沿って入力する形式で、HTMLやプログラミングの知識は一切必要ありません。' },
     { q: 'スマホから管理できますか？', a: 'はい、可能です。管理画面・公開サイトともにスマートフォンに完全対応しています。試合直後にスマホからスコアを入力する、といった使い方をされている運営者の方が多いです。' },
     { q: '途中で解約できますか？', a: 'はい、いつでも解約いただけます。年額制ですが、ご利用期間の残月分について日割りでのご返金には対応しておりませんので、その点のみご了承ください。' },
+    { q: '独自ドメインは使えますか？', a: 'はい、対応しています。標準では leaguru.jp/◯◯ 形式の専用URLをご利用いただけます。すでにお持ちのドメイン（例: sbl-kobe.com）をお使いになりたい場合も、お申し込み後のセットアップ時にご相談ください。追加料金なしで設定いたします。' },
     { q: '複数のリーグを管理できますか？', a: '複数リーグを管理される場合は、リーグごとにお申し込みいただく形となります。連盟様向けに、複数リーグをまとめて管理できるプランも準備中です。お気軽にご相談ください。' },
   ]
   const [open, setOpen] = useState(0)
@@ -518,11 +536,54 @@ function ContactCTA() {
   )
 }
 
+type SlugStatus = 'idle' | 'checking' | 'available' | 'taken' | 'invalid' | 'reserved'
+
 function ApplicationForm() {
-  const [form, setForm] = useState({ leagueName: '', contact: '', email: '', phone: '', size: '' })
-  const [submitted, setSubmitted] = useState(false)
+  const [form, setForm] = useState({ leagueName: '', contact: '', email: '', phone: '', size: '', slug: '' })
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [slugStatus, setSlugStatus] = useState<SlugStatus>('idle')
+  const slugTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
-  const submit = (e: React.FormEvent) => { e.preventDefault(); setSubmitted(true) }
+
+  const onSlugChange = (raw: string) => {
+    const v = raw.toLowerCase().replace(/[^a-z0-9-]/g, '')
+    set('slug', v)
+    if (slugTimer.current) clearTimeout(slugTimer.current)
+    if (!v) { setSlugStatus('idle'); return }
+    if (!/^[a-z0-9][a-z0-9-]{1,18}[a-z0-9]$/.test(v)) { setSlugStatus('invalid'); return }
+    setSlugStatus('checking')
+    slugTimer.current = setTimeout(async () => {
+      const res = await fetch(`/api/check-slug?slug=${encodeURIComponent(v)}`)
+      const { available, reason } = await res.json()
+      setSlugStatus(available ? 'available' : (reason === 'reserved' ? 'reserved' : 'taken'))
+    }, 600)
+  }
+
+  const slugMessage = {
+    idle:      null,
+    checking:  <span style={{ color: 'var(--muted)', fontSize: 12 }}>確認中...</span>,
+    available: <span style={{ color: '#16a34a', fontSize: 12 }}>✓ 使用できます</span>,
+    taken:     <span style={{ color: '#ef4444', fontSize: 12 }}>✗ すでに使われています</span>,
+    invalid:   <span style={{ color: '#ef4444', fontSize: 12 }}>✗ 英数字・ハイフンのみ、3〜20文字</span>,
+    reserved:  <span style={{ color: '#ef4444', fontSize: 12 }}>✗ このURLは使用できません</span>,
+  }[slugStatus]
+
+  const canSubmit = !loading && form.slug && slugStatus === 'available'
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!canSubmit) return
+    setLoading(true); setError('')
+    const res = await fetch('/api/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(form),
+    })
+    if (!res.ok) { setError('エラーが発生しました。時間をおいて再度お試しください。'); setLoading(false); return }
+    const { url } = await res.json()
+    window.location.href = url
+  }
   return (
     <section className="form-section" id="apply">
       <div className="container">
@@ -542,34 +603,42 @@ function ApplicationForm() {
             </div>
             <ul>
               <li><span className="ic"><Icon name="check" size={12} /></span>決済完了と同時に管理画面が開設されます</li>
-              <li><span className="ic"><Icon name="check" size={12} /></span>年額 ¥15,000(税込)・追加料金一切なし</li>
-              <li><span className="ic"><Icon name="check" size={12} /></span>初期設定・データ移行は無料サポート</li>
+              <li><span className="ic"><Icon name="check" size={12} /></span>年額 ¥18,000(税込)・追加料金一切なし</li>
               <li><span className="ic"><Icon name="check" size={12} /></span>クレジットカード/ Apple Pay / Google Pay 対応</li>
             </ul>
           </div>
           <div className="form-card">
-            {submitted ? (
-              <div className="form-success">
-                <Icon name="check" size={32} />
-                <div style={{ fontSize: 18, marginTop: 6 }}>お申し込みを受け付けました</div>
-                <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--ink-2)', lineHeight: 1.8 }}>続けて決済画面へお進みください。<br />決済完了後、すぐに管理画面をご利用いただけます。</div>
-                <a className="btn btn-primary btn-lg" href="#" style={{ marginTop: 16 }}>Stripe決済へ進む(¥15,000 / 年) <Icon name="arrow-right" size={16} /></a>
-                <small style={{ color: 'var(--muted)', marginTop: 8, fontWeight: 500 }}>
-                  <Icon name="lock" size={11} style={{ verticalAlign: 'middle', marginRight: 3 }} />Stripeの安全な決済ページに遷移します
-                </small>
-              </div>
-            ) : (
-              <form onSubmit={submit}>
+            <form onSubmit={submit}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 18 }}>
                   <h3 style={{ margin: 0, fontSize: 18, color: 'var(--navy-900)' }}>申込フォーム</h3>
-                  <span style={{ fontSize: 12, color: 'var(--muted)' }}>年額 ¥15,000(税込)</span>
+                  <span style={{ fontSize: 12, color: 'var(--muted)' }}>年額 ¥18,000(税込) · 30日間無料トライアル</span>
                 </div>
                 <div className="form-row"><label>リーグ名 <span className="req">必須</span></label><input type="text" required value={form.leagueName} onChange={e => set('leagueName', e.target.value)} placeholder="例:多摩川草野球リーグ" /></div>
                 <div className="form-row"><label>担当者名 <span className="req">必須</span></label><input type="text" required value={form.contact} onChange={e => set('contact', e.target.value)} placeholder="例:山田 太郎" /></div>
                 <div className="form-row"><label>メールアドレス <span className="req">必須</span></label><input type="email" required value={form.email} onChange={e => set('email', e.target.value)} placeholder="example@league.jp" /></div>
                 <div className="form-row"><label>電話番号 <span className="opt">任意</span></label><input type="tel" value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="090-0000-0000" /></div>
                 <div className="form-row">
-                  <label>リーグ規模(チーム数) <span className="req">必須</span></label>
+                  <label>サイトURL <span className="req">必須</span></label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <input
+                      type="text"
+                      value={form.slug}
+                      onChange={e => onSlugChange(e.target.value)}
+                      placeholder="例: tamagawa"
+                      maxLength={20}
+                      style={{ flex: 1, minWidth: 0 }}
+                    />
+                    <span style={{ fontSize: 13, color: 'var(--muted)', whiteSpace: 'nowrap' }}>.leaguru.jp</span>
+                  </div>
+                  <div style={{ marginTop: 4, minHeight: 18 }}>{slugMessage}</div>
+                  {form.slug && slugStatus === 'available' && (
+                    <div style={{ fontSize: 12, color: '#16a34a', marginTop: 2 }}>
+                      公開URL: <strong>https://{form.slug}.leaguru.jp</strong>
+                    </div>
+                  )}
+                </div>
+                <div className="form-row">
+                  <label>リーグ規模(チーム数) <span className="opt">任意</span></label>
                   <div className="form-segments">
                     {[{ v: 'small', top: '〜', val: '8チーム' }, { v: 'mid', top: '9〜', val: '16チーム' }, { v: 'large', top: '17', val: 'チーム以上' }].map(opt => (
                       <button type="button" key={opt.v} className={'form-seg' + (form.size === opt.v ? ' active' : '')} onClick={() => set('size', opt.v)}>
@@ -579,10 +648,12 @@ function ApplicationForm() {
                     ))}
                   </div>
                 </div>
-                <button type="submit" className="btn btn-primary btn-lg form-submit">決済へ進む(¥15,000 / 年) <Icon name="arrow-right" size={18} /></button>
-                <p className="form-note"><Icon name="lock" size={11} style={{ verticalAlign: 'middle', marginRight: 4 }} />この後 Stripe の安全な決済画面へ遷移します · <a href="#" style={{ textDecoration: 'underline' }}>プライバシーポリシー</a></p>
+                {error && <p style={{ color: '#ef4444', fontSize: 13, margin: '8px 0 0' }}>{error}</p>}
+                <button type="submit" disabled={!canSubmit} className="btn btn-primary btn-lg form-submit">
+                  {loading ? '決済ページへ移動中...' : '30日無料で試す → 決済へ進む(¥18,000 / 年)'}{!loading && <Icon name="arrow-right" size={18} />}
+                </button>
+                <p className="form-note"><Icon name="lock" size={11} style={{ verticalAlign: 'middle', marginRight: 4 }} />この後 Stripe の安全な決済画面へ遷移します · <a href="/privacy" style={{ textDecoration: 'underline' }}>プライバシーポリシー</a></p>
               </form>
-            )}
           </div>
         </div>
       </div>
@@ -595,7 +666,7 @@ function CTAStrip() {
     <section className="cta-strip">
       <div className="container">
         <h2>あなたのリーグの公式サイトを、今日から。</h2>
-        <p>年額 ¥15,000(税込)、追加料金なし。まずはお気軽にご相談ください。</p>
+        <p>年額 ¥18,000(税込)、30日間無料トライアル付き。まずはお気軽にご相談ください。</p>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
           <a className="btn btn-primary btn-lg" href="#apply">いますぐ申し込む</a>
           <a className="btn btn-secondary btn-lg" href="/contact">お問い合わせ</a>
@@ -619,7 +690,7 @@ function Footer() {
           </div>
           <div className="foot-col"><h4>サービス</h4><ul><li><a href="#features">機能一覧</a></li><li><a href="#pricing">料金</a></li><li><a href="#faq">よくあるご質問</a></li></ul></div>
           <div className="foot-col"><h4>サポート</h4><ul><li><a href="/contact">お問い合わせ</a></li><li><a href="#">ヘルプセンター</a></li><li><a href="#">運営フロー</a></li></ul></div>
-          <div className="foot-col"><h4>会社情報</h4><ul><li><a href="#">運営者情報</a></li><li><a href="/terms">利用規約</a></li><li><a href="/privacy">プライバシーポリシー</a></li><li><a href="/tokusho">特定商取引法に基づく表記</a></li></ul></div>
+          <div className="foot-col"><h4>会社情報</h4><ul><li><a href="/operator">開発者について</a></li><li><a href="/terms">利用規約</a></li><li><a href="/privacy">プライバシーポリシー</a></li><li><a href="/tokusho">特定商取引法に基づく表記</a></li></ul></div>
         </div>
         <div className="foot-bottom">
           <small>© 2026 Leaguru. All rights reserved.</small>

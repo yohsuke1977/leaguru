@@ -31,6 +31,7 @@ export default function Icon({ name, size = 24, stroke = 1.6, ...rest }: IconPro
     case 'bell': return <svg {...props}><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10 21a2 2 0 0 0 4 0" /></svg>
     case 'spark': return <svg {...props}><path d="M12 3v3M12 18v3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M3 12h3M18 12h3M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" /></svg>
     case 'lock': return <svg {...props}><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg>
+    case 'globe': return <svg {...props}><circle cx="12" cy="12" r="9" /><path d="M12 3c-2.5 4-2.5 14 0 18" /><path d="M12 3c2.5 4 2.5 14 0 18" /><path d="M3.5 8h17" /><path d="M3.5 16h17" /></svg>
     default: return null
   }
 }
