@@ -59,6 +59,7 @@ function Nav() {
           <a href="#how">使い方</a>
           <a href="#pricing">料金</a>
           <a href="#faq">よくある質問</a>
+          <a href="/blog">ブログ</a>
         </nav>
         <div className="nav-cta">
           <a className="btn btn-ghost desktop-only" href="/contact" style={{ padding: '10px 16px', fontSize: 13.5 }}>お問い合わせ</a>
@@ -78,6 +79,7 @@ function Nav() {
             <a href="#pricing" onClick={close}>料金</a>
             <a href="#news" onClick={close}>ニュース</a>
             <a href="#faq" onClick={close}>よくあるご質問</a>
+            <a href="/blog" onClick={close}>ブログ</a>
             <a href="/contact" onClick={close}>お問い合わせ</a>
           </nav>
           <div className="mobile-cta">
@@ -688,7 +690,7 @@ function Footer() {
             </div>
             <p>野球リーグの公式サイト作成・運営管理サービス。草野球から少年野球、社会人リーグまで、全国で導入いただいています。</p>
           </div>
-          <div className="foot-col"><h4>サービス</h4><ul><li><a href="#features">機能一覧</a></li><li><a href="#pricing">料金</a></li><li><a href="#faq">よくあるご質問</a></li></ul></div>
+          <div className="foot-col"><h4>サービス</h4><ul><li><a href="#features">機能一覧</a></li><li><a href="#pricing">料金</a></li><li><a href="#faq">よくあるご質問</a></li><li><a href="/blog">ブログ</a></li></ul></div>
           <div className="foot-col"><h4>サポート</h4><ul><li><a href="/contact">お問い合わせ</a></li><li><a href="#">ヘルプセンター</a></li><li><a href="#">運営フロー</a></li></ul></div>
           <div className="foot-col"><h4>会社情報</h4><ul><li><a href="/operator">開発者について</a></li><li><a href="/terms">利用規約</a></li><li><a href="/privacy">プライバシーポリシー</a></li><li><a href="/tokusho">特定商取引法に基づく表記</a></li></ul></div>
         </div>
