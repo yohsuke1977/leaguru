@@ -4,3 +4,4 @@ dist-server
 .env
 .vercel
 .env*.local
+.DS_Store
