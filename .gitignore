@@ -5,3 +5,6 @@ dist-server
 .vercel
 .env*.local
 .DS_Store
+
+# Google Indexing API のサービスアカウント鍵
+scripts/indexing-key.json
