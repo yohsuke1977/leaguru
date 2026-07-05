@@ -59,11 +59,13 @@ api/               # Vercel Serverless Functions
 
 ---
 
-## SEOの現状と課題
+## SEOの現状
 
-- React SPA のためクローラーがコンテンツを読み取れない（Issue #23）
+- **プリレンダリング対応済み**（Issue #23 解決）。`build` で `vite build --ssr src/entry-server.tsx` → `scripts/prerender.mjs` が各ページ・全ブログ記事を静的HTML化（title/description/本文がHTMLに埋まる＝クローラー可読）。
+- **ブログ記事8本**を `content/blog/*.md` で管理（`src/lib/posts.ts` がビルド時に読込）。狙い: 「草野球 リーグ 運営 日程」「成績 集計」「参加費 管理」等の運営者向けロングテール。
+- `dist/sitemap.xml` に全記事を出力 → `npm run notify-index` で Google Indexing API に送信。
 - 狙いキーワード: 「野球リーグ 管理」「野球リーグ 公式サイト 作成」等
-- 対応予定: vite-plugin-ssg 導入（テナントが増えてから）
+- 残課題は**オンページSEOではなく集客・被リンク（オフページ／SNS配信）**。記事は書けているが外部への配信・PRが手薄（生息地への告知・記事の各SNS展開が次の一手）。
 
 ---
 
