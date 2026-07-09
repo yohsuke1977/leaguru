@@ -678,6 +678,36 @@ function CTAStrip() {
   )
 }
 
+function EcosystemSection() {
+  return (
+    <section id="tools" style={{ background: '#f4f6fa', padding: '88px 0' }}>
+      <div className="container">
+        <div className="section-head reveal">
+          <span className="eyebrow">For Your Teams</span>
+          <h2 className="section-title">リーグだけでなく、チーム単位でも。</h2>
+          <p className="section-lead">
+            Leaguru はリーグ全体の運営を支えるサービスです。あわせて、所属チーム向けのツールも同じ作り手が用意しています。リーグに導入すれば、選手やチームにそのまま勧められます。
+          </p>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20, maxWidth: 760, margin: '0 auto' }}>
+          <a className="feature reveal" href="https://ninepage.jp" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <div className="ic"><Icon name="team" size={26} /></div>
+            <h3>Ninepage <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent-deep)' }}>無料</span></h3>
+            <p>草野球チームの公式サイトが、無料でつくれる。ロゴ・選手一覧・写真・試合予定をまとめて、URLを配るだけ。</p>
+            <span style={{ color: 'var(--accent-deep)', fontWeight: 600, fontSize: 14 }}>ninepage.jp →</span>
+          </a>
+          <a className="feature reveal" href="https://ninecut.app" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit', transitionDelay: '60ms' }}>
+            <div className="ic"><Icon name="play" size={26} /></div>
+            <h3>NineCut</h3>
+            <p>撮った試合動画に、プロ中継のようなスコア表示を後付け。草野球の記録が、ぐっと“作品”になります。</p>
+            <span style={{ color: 'var(--accent-deep)', fontWeight: 600, fontSize: 14 }}>ninecut.app →</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 function Footer() {
   return (
     <footer className="foot">
@@ -731,6 +761,7 @@ export default function App() {
         <ContactCTA />
         <ApplicationForm />
         <CTAStrip />
+        <EcosystemSection />
       </main>
       <Footer />
     </>
