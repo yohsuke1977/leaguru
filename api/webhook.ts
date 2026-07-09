@@ -23,6 +23,13 @@ function toSlug(name: string): string {
   return 'league-' + Math.random().toString(36).slice(2, 8)
 }
 
+// Stripe API 2025-03-31.basil 以降、current_period_end は Subscription 直下から
+// サブスクリプションアイテム側（items.data[].current_period_end）へ移動した
+function subPeriodEndISO(sub: Stripe.Subscription): string | null {
+  const end = sub.items?.data?.[0]?.current_period_end
+  return typeof end === 'number' ? new Date(end * 1000).toISOString() : null
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).end()
 
@@ -83,7 +90,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (customerId) {
       await supabase.from('leagues').update({
         stripe_subscription_id: sub.id,
-        current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
+        current_period_end: subPeriodEndISO(sub),
         cancel_at_period_end: sub.cancel_at_period_end,
       }).eq('stripe_customer_id', customerId)
     }
@@ -157,7 +164,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   let periodEnd: string | null = null
   if (stripeSubscriptionId) {
     const sub = await stripe.subscriptions.retrieve(stripeSubscriptionId)
-    periodEnd = new Date(sub.current_period_end * 1000).toISOString()
+    periodEnd = subPeriodEndISO(sub)
   }
   const { data: league, error: leagueErr } = await supabase
     .from('leagues')
