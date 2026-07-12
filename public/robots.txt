@@ -1,4 +1,9 @@
+# Leaguru (leaguru.jp) — 検索・AI利用・AI学習をすべて許可する意思表示
+# Content-Signal: https://contentsignals.org/
 User-agent: *
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
 Allow: /
+Disallow: /api/
+Disallow: /success
 
 Sitemap: https://leaguru.jp/sitemap.xml

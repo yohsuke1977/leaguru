@@ -26,6 +26,74 @@ const routes = [...baseRoutes, ...blogRoutes]
 const escHtml = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 const escAttr = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;')
 
+// ============ GEO: JSON-LD (Schema.org) 注入 ============
+const stripTags = (s) => String(s).replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/\s+/g, ' ').trim()
+// </script> 内で閉じられないよう < をエスケープしてJSONを埋め込む
+const jsonLdTag = (obj) => `<script type="application/ld+json">${JSON.stringify(obj).replace(/</g, '\\u003c')}</script>`
+
+const PUBLISHER = { '@type': 'Organization', name: 'Leaguru', url: SITE, logo: { '@type': 'ImageObject', url: `${SITE}/ogp.png` } }
+
+// 記事HTML内の「## よくある質問」配下の h3(Q)+本文 を FAQPage にする
+function extractFaq(postHtml) {
+  const idx = postHtml.indexOf('よくある質問')
+  if (idx === -1) return null
+  const seg = postHtml.slice(idx)
+  const qa = [...seg.matchAll(/<h3[^>]*>([\s\S]*?)<\/h3>([\s\S]*?)(?=<h3|<h2|$)/g)]
+  const mainEntity = qa
+    .map((m) => ({
+      '@type': 'Question',
+      name: stripTags(m[1]).replace(/^Q[.．:：]?\s*/, ''),
+      acceptedAnswer: { '@type': 'Answer', text: stripTags(m[2]) },
+    }))
+    .filter((q) => q.name && q.acceptedAnswer.text)
+  return mainEntity.length ? { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity } : null
+}
+
+function buildJsonLd(url) {
+  const tags = []
+  if (url === '/') {
+    tags.push(jsonLdTag({
+      '@context': 'https://schema.org',
+      '@type': 'SoftwareApplication',
+      name: 'Leaguru（リーグル）',
+      applicationCategory: 'SportsApplication',
+      operatingSystem: 'Web',
+      description: '草野球・少年野球リーグ向けの公式サイト作成・運営管理サービス。順位表・日程・試合結果・個人成績・トーナメント表を自動集計/公開できる。',
+      url: SITE,
+      offers: { '@type': 'Offer', price: '18000', priceCurrency: 'JPY', description: '年額18,000円（税込）/ リーグ・30日間無料トライアル' },
+      publisher: PUBLISHER,
+    }))
+    tags.push(jsonLdTag({
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      name: 'Leaguru',
+      url: SITE,
+      logo: `${SITE}/ogp.png`,
+      sameAs: ['https://x.com/leaguru_jp'],
+    }))
+    return tags.join('\n')
+  }
+  const post = posts.find((p) => `/blog/${p.slug}` === url)
+  if (post) {
+    tags.push(jsonLdTag({
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      headline: post.title,
+      description: post.description,
+      datePublished: post.date,
+      dateModified: post.date,
+      inLanguage: 'ja',
+      mainEntityOfPage: `${SITE}/blog/${post.slug}`,
+      author: { '@type': 'Person', name: 'ようすけ（Leaguru開発者・草野球リーグ運営20年）' },
+      publisher: PUBLISHER,
+    }))
+    const faq = extractFaq(post.html)
+    if (faq) tags.push(jsonLdTag(faq))
+    return tags.join('\n')
+  }
+  return ''
+}
+
 function applyHead(html, url) {
   const canonical = url === '/' ? SITE : SITE + url
   html = html.replace(/<link rel="canonical"[^>]*>/, `<link rel="canonical" href="${canonical}" />`)
@@ -41,6 +109,9 @@ function applyHead(html, url) {
     html = html.replace(/(<meta name="twitter:title" content=")[^"]*(")/, `$1${escAttr(meta.title)}$2`)
     html = html.replace(/(<meta name="twitter:description" content=")[^"]*(")/, `$1${d}$2`)
   }
+  // GEO: JSON-LD（トップ=SoftwareApplication+Organization / 記事=BlogPosting+FAQPage）
+  const jsonLd = buildJsonLd(url)
+  if (jsonLd) html = html.replace('</head>', `${jsonLd}\n</head>`)
   return html
 }
 
