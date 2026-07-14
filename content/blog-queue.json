@@ -25,7 +25,9 @@
     {
       "keyword": "草野球 雨天中止 順延 判断",
       "angle": "中止/順延の判断基準・連絡フロー・予備日の設計",
-      "done": false
+      "done": true,
+      "slug": "rain-cancellation-decision-flow",
+      "publishedAt": "2026-07-14"
     },
     {
       "keyword": "草野球 グラウンド 予約 確保 コツ",

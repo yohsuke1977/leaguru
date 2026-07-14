@@ -92,8 +92,11 @@ ${existingPosts.map((p) => `- ${p.title} ｜ ${p.desc.slice(0, 60)} ｜ /blog/${
 
 このテーマで、上記の構造・書式に厳密に沿った記事を1本、JSONで出力してください。`;
 
-// --- Claude API 呼び出し ---
-async function callClaude() {
+// --- Claude API 呼び出し（feedback: 前回ゲート不合格の理由を添えて再生成させる） ---
+async function callClaude(feedback) {
+  const user = feedback
+    ? `${USER}\n\n【前回の出力は検品で不合格でした。必ず直すこと】\n- ${feedback.join('\n- ')}\n特に伏字（〇〇/○○/△△）は絶対に使わず、具体例で書くこと。`
+    : USER;
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -105,7 +108,7 @@ async function callClaude() {
       model: MODEL,
       max_tokens: 8000,
       system: SYSTEM,
-      messages: [{ role: 'user', content: USER }],
+      messages: [{ role: 'user', content: user }],
     }),
   });
   if (!res.ok) throw new Error(`Anthropic HTTP ${res.status}: ${(await res.text()).slice(0, 300)}`);
@@ -149,12 +152,19 @@ function gate(a) {
 }
 
 // --- メイン ---
+const MAX_TRIES = 3;
 (async () => {
   console.log(`生成: ${topic} (model=${MODEL})`);
-  const a = await callClaude();
-  const errs = gate(a);
+  let a, errs, feedback;
+  for (let i = 1; i <= MAX_TRIES; i++) {
+    a = await callClaude(feedback);
+    errs = gate(a);
+    if (!errs.length) break;
+    console.error(`⚠️ 試行${i}/${MAX_TRIES} 検品不合格: ${errs.join(' / ')}`);
+    feedback = errs;
+  }
   if (errs.length) {
-    console.error('🛑 安全ゲート不合格→公開しない:\n  - ' + errs.join('\n  - '));
+    console.error(`🛑 ${MAX_TRIES}回とも安全ゲート不合格→公開しない:\n  - ` + errs.join('\n  - '));
     process.exit(1);
   }
   const today = new Date().toISOString().slice(0, 10);
