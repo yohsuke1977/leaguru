@@ -18,7 +18,9 @@
     {
       "keyword": "草野球リーグ 連絡 LINEグループ 運営",
       "angle": "連絡・情報共有をLINE等でどう回すか・崩れない運用",
-      "done": false
+      "done": true,
+      "slug": "line-group-communication-league-ops",
+      "publishedAt": "2026-07-14"
     },
     {
       "keyword": "草野球 雨天中止 順延 判断",
