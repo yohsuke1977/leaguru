@@ -32,7 +32,9 @@
     {
       "keyword": "草野球 グラウンド 予約 確保 コツ",
       "angle": "公営グラウンドの抽選・予約・球場確保の現実的なコツ",
-      "done": false
+      "done": true,
+      "slug": "ground-reservation-tips",
+      "publishedAt": "2026-07-14"
     },
     {
       "keyword": "草野球 掛け持ち 選手登録 管理",
