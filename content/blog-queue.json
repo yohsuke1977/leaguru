@@ -39,7 +39,9 @@
     {
       "keyword": "草野球 掛け持ち 選手登録 管理",
       "angle": "掛け持ち・二重登録をどう扱うか・登録管理の考え方",
-      "done": false
+      "done": true,
+      "slug": "double-registration-player-management",
+      "publishedAt": "2026-07-14"
     },
     {
       "keyword": "草野球 リーグ戦 トーナメント 違い どっち",
