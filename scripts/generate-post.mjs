@@ -48,7 +48,7 @@ let queue = null;
 if (!topic) {
   queue = JSON.parse(fs.readFileSync(QUEUE, 'utf8'));
   const next = queue.topics.find((t) => !t.done);
-  if (!next) { console.error('queueに未生成トピックが無い。content/blog-queue.json に追加を。'); process.exit(1); }
+  if (!next) { console.log('✅ queueに未生成トピックが無い（今日は生成せず正常終了）。ネタは blog-queue.json に追加を。'); process.exit(0); }
   topic = `${next.keyword}｜${next.angle}`;
   next._picked = true;
 }
