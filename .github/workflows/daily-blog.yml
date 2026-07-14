@@ -1,0 +1,53 @@
+name: Daily Blog
+
+# 毎日1本、草野球リーグ運営者向けのブログ記事を自動生成して公開する。
+# 生成 → 安全ゲート（検品）合格分だけ → commit&push（Vercelが自動デプロイ）→ Indexing API へクロール催促。
+# ゲート不合格 or ネタ切れ時は generate-post.mjs が exit 1 → publishせずジョブ失敗（＝低品質を公開しない安全側）。
+
+on:
+  schedule:
+    - cron: '0 23 * * *'   # 毎日 UTC 23:00 = JST 08:00
+  workflow_dispatch:        # 手動実行も可能
+
+permissions:
+  contents: write           # 生成記事の commit & push 用
+
+concurrency:
+  group: daily-blog
+  cancel-in-progress: false
+
+jobs:
+  write:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      # 記事を1本生成（Claude Sonnet）。安全ゲート不合格 or ネタ切れなら exit 1 でここで停止。
+      - name: Generate post
+        id: gen
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node scripts/generate-post.mjs
+
+      # 生成された記事とqueueをコミットして push（Vercelが自動でデプロイ）
+      - name: Commit & push
+        run: |
+          git config user.name  "leaguru-blog-bot"
+          git config user.email "bot@leaguru.jp"
+          git add content/blog content/blog-queue.json
+          if git diff --cached --quiet; then
+            echo "no changes"; exit 0
+          fi
+          git commit -m "blog: ${{ steps.gen.outputs.title }} (auto)"
+          git push
+
+      # 新記事URLを Google Indexing API に直接通知（sitemap反映前でも効くよう直指定）
+      - name: Notify Indexing API
+        if: steps.gen.outputs.slug != ''
+        env:
+          GOOGLE_INDEXING_KEY: ${{ secrets.GOOGLE_INDEXING_KEY }}
+        run: node scripts/notify-indexing.mjs "https://leaguru.jp/blog/${{ steps.gen.outputs.slug }}"
