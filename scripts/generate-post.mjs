@@ -167,7 +167,7 @@ const MAX_TRIES = 3;
     console.error(`🛑 ${MAX_TRIES}回とも安全ゲート不合格→公開しない:\n  - ` + errs.join('\n  - '));
     process.exit(1);
   }
-  const today = new Date().toISOString().slice(0, 10);
+  const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Tokyo' });
   const tags = `[${a.tags.join(', ')}]`;
   const md = `---\ntitle: ${a.title}\ndescription: ${a.description}\ndate: ${today}\ntags: ${tags}\n---\n\n${a.body.trim()}\n`;
   const out = path.join(BLOG_DIR, `${a.slug}.md`);
