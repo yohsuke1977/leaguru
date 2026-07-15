@@ -37,7 +37,7 @@ jobs:
       - name: Commit & push
         run: |
           git config user.name  "leaguru-blog-bot"
-          git config user.email "bot@leaguru.jp"
+          git config user.email "5418073+yohsuke1977@users.noreply.github.com"
           git add content/blog content/blog-queue.json
           if git diff --cached --quiet; then
             echo "no changes"; exit 0
