@@ -53,7 +53,9 @@
     {
       "keyword": "草野球リーグ 会計 お金 管理 透明性",
       "angle": "会費の会計・収支の見せ方・お金でもめない運営",
-      "done": false
+      "done": true,
+      "slug": "league-accounting-transparency",
+      "publishedAt": "2026-07-17"
     },
     {
       "keyword": "草野球 スコア つけ方 記録係 続けるコツ",
