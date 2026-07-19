@@ -74,7 +74,9 @@
     {
       "keyword": "草野球 参加チーム 募集 SNS 掲示板",
       "angle": "新規チーム募集の導線・SNS/掲示板の使い方と注意",
-      "done": false
+      "done": true,
+      "slug": "recruit-teams-sns-bulletin-board",
+      "publishedAt": "2026-07-20"
     },
     {
       "keyword": "草野球 試合成立 没収試合 人数 ルール",
