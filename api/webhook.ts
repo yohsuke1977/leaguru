@@ -154,8 +154,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (event.type !== 'checkout.session.completed') return res.json({ received: true })
 
   const session = event.data.object as Stripe.Checkout.Session
-  const { leagueName, contact, phone, size, slug: chosenSlug } = session.metadata ?? {}
+  const { leagueName, contact, phone, size, slug: chosenSlug,
+    referrer, landing_page, utm_source, utm_medium, utm_campaign } = session.metadata ?? {}
   const email = session.customer_email ?? ''
+
+  // 流入元（checkout.ts が metadata に積んだもの）。LP非経由・全項目空なら null
+  const attribution = (referrer || landing_page || utm_source || utm_medium || utm_campaign)
+    ? {
+        referrer: referrer || '', landing_page: landing_page || '',
+        utm_source: utm_source || '', utm_medium: utm_medium || '', utm_campaign: utm_campaign || '',
+      }
+    : null
 
   if (!leagueName || !email) return res.status(400).json({ error: 'Missing metadata' })
 
@@ -177,6 +186,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       stripe_customer_id: stripeCustomerId ?? null,
       stripe_subscription_id: stripeSubscriptionId ?? null,
       current_period_end: periodEnd,
+      attribution,
     })
     .select('id, slug')
     .single()

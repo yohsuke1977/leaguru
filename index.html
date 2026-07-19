@@ -62,6 +62,25 @@
       gtag('js', new Date());
       gtag('config', 'G-HNJZP3KMEK');
     </script>
+    <!-- 流入元をセッション先頭で捕捉。申込フォーム送信時に /api/checkout へ同送し、
+         webhook が leagues.attribution に保存する（regiato-lp と同パターン・キー名 lg_attr） -->
+    <script>
+      (function(){try{
+        var KEY='lg_attr';
+        if(!sessionStorage.getItem(KEY)){
+          var p=new URLSearchParams(location.search);
+          sessionStorage.setItem(KEY,JSON.stringify({
+            ref:document.referrer||'',lp:location.pathname+location.search,
+            us:p.get('utm_source')||'',um:p.get('utm_medium')||'',uc:p.get('utm_campaign')||''
+          }));
+        }
+        document.addEventListener('click',function(e){
+          var t=e.target&&e.target.closest?e.target.closest('a[href$="#apply"]'):null;
+          if(!t)return;
+          if(window.gtag)window.gtag('event','signup_click',{page_path:location.pathname});
+        },true);
+      }catch(e){}})();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -577,10 +577,14 @@ function ApplicationForm() {
     e.preventDefault()
     if (!canSubmit) return
     setLoading(true); setError('')
+    // 流入元（index.html のスクリプトが着地時に sessionStorage へ保存）を申込に同送
+    let attribution: Record<string, string> | null = null
+    try { attribution = JSON.parse(sessionStorage.getItem('lg_attr') || 'null') } catch { /* 取れなくても申込は通す */ }
+    ;(window as unknown as { gtag?: (...args: unknown[]) => void }).gtag?.('event', 'signup_submit', { page_path: location.pathname })
     const res = await fetch('/api/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
+      body: JSON.stringify({ ...form, attribution }),
     })
     if (!res.ok) { setError('エラーが発生しました。時間をおいて再度お試しください。'); setLoading(false); return }
     const { url } = await res.json()
