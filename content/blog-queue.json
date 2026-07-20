@@ -81,7 +81,9 @@
     {
       "keyword": "草野球 試合成立 没収試合 人数 ルール",
       "angle": "試合成立の人数・没収試合・遅刻棄権のルール設計",
-      "done": false
+      "done": true,
+      "slug": "forfeit-game-rules-design",
+      "publishedAt": "2026-07-21"
     },
     {
       "keyword": "草野球リーグ 順位 決め方 勝率 勝ち点",
