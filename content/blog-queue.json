@@ -88,7 +88,9 @@
     {
       "keyword": "草野球リーグ 順位 決め方 勝率 勝ち点",
       "angle": "順位決定方式（勝率/勝ち点/得失点）の選び方と同率時の処理",
-      "done": false
+      "done": true,
+      "slug": "standings-tiebreaker-rules-design",
+      "publishedAt": "2026-07-22"
     },
     {
       "keyword": "草野球 助っ人 レンタル 人数不足 対策",
