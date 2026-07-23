@@ -95,7 +95,9 @@
     {
       "keyword": "草野球 助っ人 レンタル 人数不足 対策",
       "angle": "人数不足時の助っ人・レンタル選手の扱いと公平性の担保",
-      "done": false
+      "done": true,
+      "slug": "rental-player-fairness-shorthanded",
+      "publishedAt": "2026-07-23"
     },
     {
       "keyword": "草野球リーグ 参加費 相場 集金 方法",
