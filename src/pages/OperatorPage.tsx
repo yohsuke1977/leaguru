@@ -45,6 +45,29 @@ export default function OperatorPage() {
         リーグを支えてくれている皆さんの手間が少しでも減って、グラウンドで野球を楽しむ時間が増えれば、それがいちばんの喜びです。
       </p>
 
+      <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--navy-900)', marginBottom: 16 }}>草野球のために作っている、ほかのサービス</h2>
+      <p style={{ fontSize: 15, lineHeight: 1.9, color: 'var(--ink-2)', marginBottom: 20 }}>
+        同じ現場の困りごとから、Leaguruのほかにもいくつか作っています。運営者はいずれも同じ（Zen Works）です。
+      </p>
+      <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px', display: 'grid', gap: 14 }}>
+        <li style={{ border: '1px solid var(--line, #e2e8f0)', borderRadius: 12, padding: '16px 18px' }}>
+          <a href="https://ninepage.jp" target="_blank" rel="noopener" style={{ fontSize: 16, fontWeight: 700, color: 'var(--accent-deep)' }}>Ninepage（ナインページ）</a>
+          <p style={{ fontSize: 14, lineHeight: 1.8, color: 'var(--ink-2)', margin: '6px 0 0' }}>
+            チーム単位の公式サイトを、打撃・投手成績の自動集計込みで無料で作れるサービス。リーグではなく「チーム」向けです。
+          </p>
+        </li>
+        <li style={{ border: '1px solid var(--line, #e2e8f0)', borderRadius: 12, padding: '16px 18px' }}>
+          <a href="https://ninecut.app" target="_blank" rel="noopener" style={{ fontSize: 16, fontWeight: 700, color: 'var(--accent-deep)' }}>NineCut（ナインカット）</a>
+          <p style={{ fontSize: 14, lineHeight: 1.8, color: 'var(--ink-2)', margin: '6px 0 0' }}>
+            試合動画にプロ野球中継風のスコアテロップを入れられるPC用アプリ。ハイライトを縦型（9:16）で切り出すこともできます。
+          </p>
+        </li>
+      </ul>
+
+      <p style={{ fontSize: 15, lineHeight: 1.9, color: 'var(--ink-2)', marginBottom: 40 }}>
+        作った経緯や、その過程で考えたことは <a href="https://note.com/yohsuke_zw" target="_blank" rel="noopener" style={{ color: 'var(--accent-deep)', fontWeight: 600 }}>note</a> に書いています。
+      </p>
+
       <div style={{ background: 'var(--accent-soft)', borderRadius: 12, padding: '20px 24px', fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.7 }}>
         ご質問・ご相談は <a href="mailto:support@leaguru.jp" style={{ color: 'var(--accent-deep)', fontWeight: 600 }}>support@leaguru.jp</a> または <a href="/contact" style={{ color: 'var(--accent-deep)', fontWeight: 600 }}>お問い合わせフォーム</a> からお気軽にどうぞ。
       </div>
