@@ -130,7 +130,9 @@
     {
       "keyword": "草野球 トラブル クレーム 対応 運営",
       "angle": "チーム間トラブル・判定クレームの捌き方と運営の中立",
-      "done": false
+      "done": true,
+      "slug": "conflict-complaint-handling-neutral-management",
+      "publishedAt": "2026-07-29"
     },
     {
       "keyword": "草野球リーグ 新規 立ち上げ 手順 集客",
