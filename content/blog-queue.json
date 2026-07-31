@@ -137,7 +137,9 @@
     {
       "keyword": "草野球リーグ 新規 立ち上げ 手順 集客",
       "angle": "リーグをゼロから立ち上げる手順とチーム集め",
-      "done": false
+      "done": true,
+      "slug": "start-league-from-scratch-recruit-teams",
+      "publishedAt": "2026-07-31"
     },
     {
       "keyword": "草野球 表彰 記録 個人成績 タイトル 集計",
