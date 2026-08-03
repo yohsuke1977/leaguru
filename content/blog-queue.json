@@ -144,7 +144,9 @@
     {
       "keyword": "草野球 表彰 記録 個人成績 タイトル 集計",
       "angle": "個人成績・タイトルの集計を続けるための記録運用",
-      "done": false
+      "done": true,
+      "slug": "individual-stats-title-tracking-operations",
+      "publishedAt": "2026-08-03"
     },
     {
       "keyword": "草野球 試合日程 組み方 総当たり ツール",
