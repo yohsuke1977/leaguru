@@ -151,7 +151,9 @@
     {
       "keyword": "草野球 試合日程 組み方 総当たり ツール",
       "angle": "総当たり日程の組み方と会場・曜日の制約の捌き方",
-      "done": false
+      "done": true,
+      "slug": "round-robin-schedule-constraints-tool",
+      "publishedAt": "2026-08-05"
     }
   ]
 }
