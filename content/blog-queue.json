@@ -158,9 +158,11 @@
     {
       "keyword": "トーナメント表 bye 意味",
       "angle": "検索クエリ「トーナメント表 bye 意味」の意図にそのまま答える実用記事（GSC実クエリ由来）",
-      "done": false,
+      "done": true,
       "source": "gsc-auto",
-      "addedAt": "2026-08-17"
+      "addedAt": "2026-08-17",
+      "slug": "tournament-bye-meaning-bracket-guide",
+      "publishedAt": "2026-08-17"
     }
   ]
 }
