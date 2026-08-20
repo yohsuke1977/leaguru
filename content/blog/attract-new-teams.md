@@ -37,7 +37,7 @@ tags: [リーグ運営, チーム募集, 運営者向け]
 
 公式サイトがなぜ効くのかは[こちらの記事](/blog/why-league-website)でも書きましたが、チーム募集の文脈でも同じです。**情報を先に開いておくほど、問い合わせは増え、しかも質が上がります。**
 
-文字情報に加えて試合の様子が見られると、雰囲気まで伝わります。動画を公開する場合の手順は[試合動画をYouTubeに上げる方法](https://ninecut.app/blog/upload-baseball-video-youtube?utm_source=leaguru&utm_medium=blog&utm_campaign=ninecut_ref)にまとめられています。
+文字情報に加えて試合の様子が見られると、雰囲気まで伝わります。ただし選手や子どもが映るため、公開範囲は先に決めておきたいところです。判断の目安は[試合動画の公開範囲とプライバシー配慮](https://ninecut.app/blog/youth-baseball-video-privacy-settings?utm_source=leaguru&utm_medium=blog&utm_campaign=ninecut_ref)にまとまっています。
 
 ## 続くリーグと、抜けられるリーグの差
 
