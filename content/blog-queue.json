@@ -181,7 +181,9 @@
     {
       "keyword": "草野球 二重登録 ルール 複数チーム 掛け持ち",
       "angle": "選手の二重登録・掛け持ちはどこまで許されるか。リーグ規約での線引き",
-      "done": false
+      "done": true,
+      "slug": "double-registration-league-rules-boundary",
+      "publishedAt": "2026-08-26"
     },
     {
       "keyword": "草野球 助っ人 トラブル 事例 対策",
