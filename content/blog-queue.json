@@ -209,7 +209,9 @@
     {
       "keyword": "野球 不戦勝 不戦敗 とは 扱い",
       "angle": "不戦勝・不戦敗とは。棄権時のスコアと順位表での扱いをどう決めるか",
-      "done": false
+      "done": true,
+      "slug": "forfeit-win-loss-score-standings-rules",
+      "publishedAt": "2026-09-04"
     },
     {
       "keyword": "野球 得失点差 とは 計算方法 順位",
