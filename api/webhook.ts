@@ -166,7 +166,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     : null
 
-  if (!leagueName || !email) return res.status(400).json({ error: 'Missing metadata' })
+  if (!leagueName || !email) {
+    // 同一Stripeアカウントを他プロダクト（NineCut・レジあと・推し通知）と共有しており、
+    // Leaguru以外のcheckoutもここへ届く。自分宛でないイベントは200で受け流す。
+    // 400を返すとStripeが数日リトライし続け、エラー率100%→エンドポイント自動無効化に至る。
+    console.log('Leaguru以外のcheckoutのためスキップ:', session.id)
+    return res.json({ received: true, skipped: true })
+  }
 
   // 1. リーグ作成
   const stripeCustomerId = typeof session.customer === 'string' ? session.customer : session.customer?.id
