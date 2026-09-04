@@ -10,6 +10,20 @@ const resend = new Resend(process.env.RESEND_API_KEY!)
 
 export const config = { api: { bodyParser: false } }
 
+// 途中失敗した申し込みを再開するときの照合用。supabase-js の admin API には
+// メールでの検索が無いのでページングして探す（登録ユーザー数は少ない想定）
+async function findUserByEmail(email: string) {
+  const target = email.toLowerCase()
+  for (let page = 1; page <= 20; page++) {
+    const { data, error } = await supabase.auth.admin.listUsers({ page, perPage: 200 })
+    if (error || !data?.users?.length) return null
+    const hit = data.users.find(u => u.email?.toLowerCase() === target)
+    if (hit) return hit
+    if (data.users.length < 200) return null
+  }
+  return null
+}
+
 async function getRawBody(req: VercelRequest): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = []
@@ -174,61 +188,115 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.json({ received: true, skipped: true })
   }
 
-  // 1. リーグ作成
+  // ── 冪等化 ──────────────────────────────────────────────────────────────
+  // Stripeは500を配信失敗とみなして数日リトライするが、失敗する前に書き込んだ行は
+  // 残ったままになる。同じイベントが再入したときにリーグを作り直さないよう、
+  // 既存の stripe_subscription_id を目印にして「新規 / 再開 / 完了済み」を判定する。
+  // ⚠️ slug で照合してはいけない。他人が既存リーグのslugを指定して乗っ取れてしまう
   const stripeCustomerId = typeof session.customer === 'string' ? session.customer : session.customer?.id
   const stripeSubscriptionId = typeof session.subscription === 'string' ? session.subscription : session.subscription?.id ?? null
-  let periodEnd: string | null = null
+
+  let league: { id: number; slug: string } | null = null
   if (stripeSubscriptionId) {
-    const sub = await stripe.subscriptions.retrieve(stripeSubscriptionId)
-    periodEnd = subPeriodEndISO(sub)
-  }
-  const { data: league, error: leagueErr } = await supabase
-    .from('leagues')
-    .insert({
-      name: leagueName,
-      slug: chosenSlug || toSlug(leagueName),
-      plan: 'standard',
-      status: 'active',
-      stripe_customer_id: stripeCustomerId ?? null,
-      stripe_subscription_id: stripeSubscriptionId ?? null,
-      current_period_end: periodEnd,
-      attribution,
-    })
-    .select('id, slug')
-    .single()
-
-  if (leagueErr || !league) {
-    console.error('League insert error:', leagueErr)
-    return res.status(500).json({ error: 'League creation failed' })
+    const { data: found } = await supabase
+      .from('leagues')
+      .select('id, slug')
+      .eq('stripe_subscription_id', stripeSubscriptionId)
+      .maybeSingle()
+    league = found ?? null
   }
 
-  // 2. site_settings 初期化
-  await supabase.from('site_settings').insert([
-    { key: 'site_title', value: leagueName, league_id: league.id },
-    { key: 'layout', value: 'standard', league_id: league.id },
-    { key: 'team_admin_enabled', value: 'false', league_id: league.id },
-    { key: 'contact_email', value: email, league_id: league.id },
-  ])
+  if (league) {
+    // 管理者まで作られていれば完全に完了済み。仮パスワードの再発行もメール再送もしない
+    const { data: provisioned } = await supabase
+      .from('league_admins')
+      .select('user_id')
+      .eq('league_id', league.id)
+      .limit(1)
+    if (provisioned?.length) {
+      console.log('処理済みの申し込みのためスキップ:', session.id, 'league_id=', league.id)
+      return res.json({ received: true, duplicate: true })
+    }
+    console.log('途中で失敗した申し込みを再開:', session.id, 'league_id=', league.id)
+  }
+
+  // 1. リーグ作成（再開時は既存行を使い回す）
+  if (!league) {
+    let periodEnd: string | null = null
+    if (stripeSubscriptionId) {
+      const sub = await stripe.subscriptions.retrieve(stripeSubscriptionId)
+      periodEnd = subPeriodEndISO(sub)
+    }
+    const { data: created, error: leagueErr } = await supabase
+      .from('leagues')
+      .insert({
+        name: leagueName,
+        slug: chosenSlug || toSlug(leagueName),
+        plan: 'standard',
+        status: 'active',
+        stripe_customer_id: stripeCustomerId ?? null,
+        stripe_subscription_id: stripeSubscriptionId ?? null,
+        current_period_end: periodEnd,
+        attribution,
+      })
+      .select('id, slug')
+      .single()
+
+    if (leagueErr || !created) {
+      console.error('League insert error:', leagueErr)
+      return res.status(500).json({ error: 'League creation failed' })
+    }
+    league = created
+  }
+
+  // 2. site_settings 初期化（再開時に二重登録しない）
+  const { data: existingSettings } = await supabase
+    .from('site_settings')
+    .select('key')
+    .eq('league_id', league.id)
+    .limit(1)
+  if (!existingSettings?.length) {
+    await supabase.from('site_settings').insert([
+      { key: 'site_title', value: leagueName, league_id: league.id },
+      { key: 'layout', value: 'standard', league_id: league.id },
+      { key: 'team_admin_enabled', value: 'false', league_id: league.id },
+      { key: 'contact_email', value: email, league_id: league.id },
+    ])
+  }
 
   // 3. 仮パスワード生成
   const tmpPassword = Math.random().toString(36).slice(2, 8).toUpperCase() +
     Math.random().toString(36).slice(2, 8) + '!'
 
   // 4. 管理者アカウント作成
+  // 再開時は同じメールのユーザーが既にできていることがある。その場合は作り直さず
+  // 仮パスワードだけ再設定して使い回す（ウェルカムメールの記載と一致させるため）
+  let adminUserId: string
   const { data: authUser, error: authErr } = await supabase.auth.admin.createUser({
     email,
     password: tmpPassword,
     email_confirm: true,
   })
 
-  if (authErr || !authUser.user) {
-    console.error('Auth user error:', authErr)
-    return res.status(500).json({ error: 'User creation failed' })
+  if (authUser?.user) {
+    adminUserId = authUser.user.id
+  } else {
+    const existingUser = await findUserByEmail(email)
+    if (!existingUser) {
+      console.error('Auth user error:', authErr)
+      return res.status(500).json({ error: 'User creation failed' })
+    }
+    const { error: pwErr } = await supabase.auth.admin.updateUserById(existingUser.id, { password: tmpPassword })
+    if (pwErr) {
+      console.error('Auth password reset error:', pwErr)
+      return res.status(500).json({ error: 'User creation failed' })
+    }
+    adminUserId = existingUser.id
   }
 
   // 5. league_admins に紐付け
   await supabase.from('league_admins').insert({
-    user_id: authUser.user.id,
+    user_id: adminUserId,
     league_id: league.id,
   })
 
@@ -267,7 +335,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }).catch(err => console.error('Admin notify error:', err))
 
   // 8. ウェルカムメール送信
-  await resend.emails.send({
+  // ここで throw すると500になり、Stripeのリトライ時には上の「完了済み」判定に
+  // 引っかかって二度と送られない（仮パスワードは再現できない）。
+  // そのため送信失敗は握りつぶさず、運営に手動リカバリを促す通知を出して200で終える
+  const welcome = await resend.emails.send({
     from: 'noreply@leaguru.jp',
     to: email,
     subject: `【Leaguru】${leagueName} の管理画面が開設されました`,
@@ -294,7 +365,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         <p style="color:#aaa;font-size:12px">Leaguru サポート: support@leaguru.jp</p>
       </div>
     `,
-  })
+  }).catch(err => ({ error: err as unknown }))
+
+  if (welcome && 'error' in welcome && welcome.error) {
+    console.error('ウェルカムメール送信失敗（要手動対応）:', league.slug, email, welcome.error)
+    await resend.emails.send({
+      from: 'noreply@leaguru.jp',
+      to: 'support@leaguru.jp',
+      subject: `【要対応】ウェルカムメール送信失敗: ${leagueName}`,
+      text: [
+        `${leagueName} のリーグ作成と管理者アカウント作成は完了していますが、`,
+        `申込者へのウェルカムメールだけ送信に失敗しました。`,
+        ``,
+        `宛先: ${email}`,
+        `スラグ: ${league.slug}`,
+        `管理画面: https://${league.slug}.leaguru.jp/admin/login`,
+        ``,
+        `仮パスワードは再現できないため、Supabaseからパスワード再設定を行い、`,
+        `ログイン情報を手動で案内してください。`,
+      ].join('\n'),
+    }).catch(err => console.error('サポート通知も失敗:', err))
+  }
 
   res.json({ received: true })
 }
