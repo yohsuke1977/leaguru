@@ -216,7 +216,9 @@
     {
       "keyword": "野球 得失点差 とは 計算方法 順位",
       "angle": "得失点差とは何か。計算方法と、同率時の順位決定に使うときの注意点",
-      "done": false
+      "done": true,
+      "slug": "run-differential-calculation-standings-tiebreaker",
+      "publishedAt": "2026-09-07"
     },
     {
       "keyword": "野球 規定打席 とは 計算 草野球",
