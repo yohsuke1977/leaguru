@@ -230,7 +230,9 @@
     {
       "keyword": "野球 継続試合 サスペンデッド とは",
       "angle": "継続試合（サスペンデッドゲーム）とは。草野球で採用する場合の条件と再開ルール",
-      "done": false
+      "done": true,
+      "slug": "suspended-game-rules-grass-baseball",
+      "publishedAt": "2026-09-11"
     }
   ]
 }
