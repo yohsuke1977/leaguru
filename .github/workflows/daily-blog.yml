@@ -57,3 +57,21 @@ jobs:
         env:
           GOOGLE_INDEXING_KEY: ${{ secrets.GOOGLE_INDEXING_KEY }}
         run: node scripts/notify-indexing.mjs "https://leaguru.jp/blog/${{ steps.gen.outputs.slug }}"
+
+      # 同じURLを IndexNow へも通知（Bing / DuckDuckGo / Yandex に一括で届く）。
+      #
+      # 🔴 なぜ足したか（2026-09-15に実測）: NineCutの直近90日の**購入**の参照元は
+      #    chatgpt.com 2件・bing 1件で、**Google系は0件**だった。
+      #    一方Googleは32URLのうち9件しかインデックスしておらず、18件が「検出 - インデックス未登録」。
+      #    **Googleが載せない記事をBingが換金していた**ので、Google側だけ通知していたのは片手落ち。
+      #    ChatGPT検索はBingの索引を引くので、Bingに載ることがChatGPTに載る前提になる。
+      #
+      # ⚠️ 鍵ファイル 98a4c22591aa52616a8e5fb1f4fb6e29.txt を消すとAPIは403を返す。
+      #    IndexNowの鍵は**秘密ではない**（ドメイン所有の証明にすぎず、公開前提）ので
+      #    secretsには置かず、ここに直接書いて差分で追えるようにしている。
+      # ⚠️ continue-on-error は付けない。失敗を飲み込むと「通知しているつもり」で
+      #    静かに止まる。記事の公開自体はこの前のステップで終わっているので、
+      #    ここが赤くなっても失うのは通知だけ。
+      - name: Notify IndexNow
+        if: steps.gen.outputs.slug != ''
+        run: node scripts/notify-indexnow.mjs "https://leaguru.jp/blog/${{ steps.gen.outputs.slug }}" --key 98a4c22591aa52616a8e5fb1f4fb6e29
