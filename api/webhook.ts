@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node'
 import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
+import { isPlanKey, PLAN_BY_KEY } from '../src/lib/plans'
 
 // apiVersion を明示pin。SDK更新で既定APIが変わると型エラーになり、変更に必ず気づける
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-04-22.dahlia' })
@@ -168,7 +169,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (event.type !== 'checkout.session.completed') return res.json({ received: true })
 
   const session = event.data.object as Stripe.Checkout.Session
-  const { leagueName, contact, phone, size, slug: chosenSlug,
+  const { leagueName, contact, phone, size, plan: planKey, slug: chosenSlug,
     referrer, landing_page, utm_source, utm_medium, utm_campaign } = session.metadata ?? {}
   const email = session.customer_email ?? ''
 
@@ -232,7 +233,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .insert({
         name: leagueName,
         slug: chosenSlug || toSlug(leagueName),
-        plan: 'standard',
+        // どの料金帯で契約したか。'standard' 固定だと売れた価格が残らない
+        plan: isPlanKey(planKey) ? planKey : 'standard',
         status: 'active',
         stripe_customer_id: stripeCustomerId ?? null,
         stripe_subscription_id: stripeSubscriptionId ?? null,
@@ -329,6 +331,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       `メール: ${email}`,
       `電話: ${phone || '未記入'}`,
       `規模: ${size || '未記入'}`,
+      `契約プラン: ${isPlanKey(planKey) ? `${PLAN_BY_KEY[planKey].teamsLabel} ${PLAN_BY_KEY[planKey].priceLabel}/年` : '不明'}`,
       `スラグ: ${league.slug}`,
       `管理画面: https://${league.slug}.leaguru.jp/admin/login`,
     ].join('\n'),

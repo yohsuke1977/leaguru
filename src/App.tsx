@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Icon from './components/Icon'
 import './leaguru.css'
+import { PLANS, PLAN_BY_KEY, isPlanKey, MIN_PRICE_LABEL } from './lib/plans'
 
 const ACCENT = { accent: '#ef7f2c', accentSoft: '#fde7d4', accentDeep: '#c9601a', accentInk: '#ffffff' }
 
@@ -86,7 +87,7 @@ function Nav() {
             <a className="btn btn-primary btn-lg" href="#apply" onClick={close}>いますぐ申し込む <Icon name="arrow-right" size={16} /></a>
             <a className="btn btn-ghost btn-lg" href="/contact" onClick={close}>お問い合わせ</a>
           </div>
-          <div className="mobile-foot"><small>年額 ¥18,000(税込) · 追加料金なし</small></div>
+          <div className="mobile-foot"><small>年額 {MIN_PRICE_LABEL}〜(税込) · 追加料金なし</small></div>
         </div>
       </div>
     </header>
@@ -107,7 +108,7 @@ function Hero() {
               <a className="btn btn-ghost btn-lg" href="https://demo.leaguru.jp" target="_blank" rel="noopener noreferrer"><Icon name="play" size={14} /> デモを見る</a>
             </div>
             <div className="hero-stats">
-              <div className="hero-stat"><div className="num">¥18,000<small>/年</small></div><div className="lbl">明朗な年額料金</div></div>
+              <div className="hero-stat"><div className="num">{MIN_PRICE_LABEL}<small>〜/年</small></div><div className="lbl">規模に応じた年額料金</div></div>
               <div className="hero-stat"><div className="num">5<small>分</small></div><div className="lbl">開設までの時間</div></div>
               <div className="hero-stat"><div className="num">0<small>円</small></div><div className="lbl">初期・追加費用</div></div>
             </div>
@@ -458,14 +459,22 @@ function Pricing() {
       <div className="container">
         <div className="section-head reveal">
           <span className="eyebrow">Pricing</span>
-          <h2 className="section-title">わかりやすい、1プラン。</h2>
-          <p className="section-lead">シンプルな年額制で、すべての機能をご利用いただけます。追加料金・オプション課金は一切ありません。</p>
+          <h2 className="section-title">リーグの規模に合わせて、3プラン。</h2>
+          <p className="section-lead">機能はどのプランも同じです。チーム数で料金が変わるだけ。追加料金・オプション課金は一切ありません。</p>
+        </div>
+        <div className="plan-grid reveal">
+          {PLANS.map(plan => (
+            <div className={'plan-tile' + (plan.key === 'small' ? ' plan-tile-pick' : '')} key={plan.key}>
+              {plan.key === 'small' && <span className="plan-pick">いちばん多い規模</span>}
+              <div className="plan-teams">{plan.teamsLabel}</div>
+              <div className="plan-price">{plan.priceLabel}<span className="per">/ 年</span></div>
+              <div className="plan-tax">税込・1リーグあたり</div>
+              <a className="btn btn-primary plan-cta" href="#apply">このプランで申し込む</a>
+            </div>
+          ))}
         </div>
         <div className="price-card reveal">
-          <span className="price-badge">スタンダードプラン</span>
-          <h3>Leaguru リーグサイト</h3>
-          <div className="price-amount"><span className="yen">¥</span>18,000<span className="per">/ 年</span></div>
-          <div className="price-tax">税込・1リーグあたり</div>
+          <h3>どのプランでも使える機能</h3>
           <div className="price-features">
             {features.map((f, i) => (
               <div className="price-feature" key={i}><span className="check"><Icon name="check" size={14} /></span>{f}</div>
@@ -571,7 +580,8 @@ function ApplicationForm() {
     reserved:  <span style={{ color: '#ef4444', fontSize: 12 }}>✗ このURLは使用できません</span>,
   }[slugStatus]
 
-  const canSubmit = !loading && form.slug && slugStatus === 'available'
+  // リーグ規模＝課金プラン。未選択のまま決済に進ませない
+  const canSubmit = !loading && form.slug && slugStatus === 'available' && isPlanKey(form.size)
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -609,7 +619,7 @@ function ApplicationForm() {
             </div>
             <ul>
               <li><span className="ic"><Icon name="check" size={12} /></span>決済完了と同時に管理画面が開設されます</li>
-              <li><span className="ic"><Icon name="check" size={12} /></span>年額 ¥18,000(税込)・追加料金一切なし</li>
+              <li><span className="ic"><Icon name="check" size={12} /></span>年額 {MIN_PRICE_LABEL}〜(税込)・追加料金一切なし</li>
               <li><span className="ic"><Icon name="check" size={12} /></span>クレジットカード/ Apple Pay / Google Pay 対応</li>
             </ul>
           </div>
@@ -617,7 +627,7 @@ function ApplicationForm() {
             <form onSubmit={submit}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 18 }}>
                   <h3 style={{ margin: 0, fontSize: 18, color: 'var(--navy-900)' }}>申込フォーム</h3>
-                  <span style={{ fontSize: 12, color: 'var(--muted)' }}>年額 ¥18,000(税込) · 30日間無料トライアル</span>
+                  <span style={{ fontSize: 12, color: 'var(--muted)' }}>年額 {MIN_PRICE_LABEL}〜(税込) · 30日間無料トライアル</span>
                 </div>
                 <div className="form-row"><label>リーグ名 <span className="req">必須</span></label><input type="text" required value={form.leagueName} onChange={e => set('leagueName', e.target.value)} placeholder="例:多摩川草野球リーグ" /></div>
                 <div className="form-row"><label>担当者名 <span className="req">必須</span></label><input type="text" required value={form.contact} onChange={e => set('contact', e.target.value)} placeholder="例:山田 太郎" /></div>
@@ -644,19 +654,26 @@ function ApplicationForm() {
                   )}
                 </div>
                 <div className="form-row">
-                  <label>リーグ規模(チーム数) <span className="opt">任意</span></label>
+                  <label>リーグ規模(チーム数) <span className="req">必須</span></label>
                   <div className="form-segments">
-                    {[{ v: 'small', top: '〜', val: '8チーム' }, { v: 'mid', top: '9〜', val: '16チーム' }, { v: 'large', top: '17', val: 'チーム以上' }].map(opt => (
-                      <button type="button" key={opt.v} className={'form-seg' + (form.size === opt.v ? ' active' : '')} onClick={() => set('size', opt.v)}>
-                        <div className="top">{opt.top}</div>
-                        <div>{opt.val}</div>
+                    {PLANS.map(plan => (
+                      <button type="button" key={plan.key} className={'form-seg' + (form.size === plan.key ? ' active' : '')} onClick={() => set('size', plan.key)}>
+                        <div className="top">{plan.teamsLabel}</div>
+                        <div>{plan.priceLabel}<span style={{ fontSize: 11, opacity: .7 }}>/年</span></div>
                       </button>
                     ))}
                   </div>
+                  <p className="form-note" style={{ marginTop: 6 }}>
+                    チーム数によって料金が変わります。シーズン途中で増減しても、その年の料金は変わりません。
+                  </p>
                 </div>
                 {error && <p style={{ color: '#ef4444', fontSize: 13, margin: '8px 0 0' }}>{error}</p>}
                 <button type="submit" disabled={!canSubmit} className="btn btn-primary btn-lg form-submit">
-                  {loading ? '決済ページへ移動中...' : '30日無料で試す → 決済へ進む(¥18,000 / 年)'}{!loading && <Icon name="arrow-right" size={18} />}
+                  {loading
+                    ? '決済ページへ移動中...'
+                    : isPlanKey(form.size)
+                      ? `30日無料で試す → 決済へ進む(${PLAN_BY_KEY[form.size].priceLabel} / 年)`
+                      : '30日無料で試す → 決済へ進む'}{!loading && <Icon name="arrow-right" size={18} />}
                 </button>
                 <p className="form-note"><Icon name="lock" size={11} style={{ verticalAlign: 'middle', marginRight: 4 }} />この後 Stripe の安全な決済画面へ遷移します · <a href="/privacy" style={{ textDecoration: 'underline' }}>プライバシーポリシー</a></p>
               </form>
@@ -672,7 +689,7 @@ function CTAStrip() {
     <section className="cta-strip">
       <div className="container">
         <h2>あなたのリーグの公式サイトを、今日から。</h2>
-        <p>年額 ¥18,000(税込)、30日間無料トライアル付き。まずはお気軽にご相談ください。</p>
+        <p>年額 {MIN_PRICE_LABEL}〜(税込)、30日間無料トライアル付き。まずはお気軽にご相談ください。</p>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
           <a className="btn btn-primary btn-lg" href="#apply">いますぐ申し込む</a>
           <a className="btn btn-secondary btn-lg" href="/contact">お問い合わせ</a>

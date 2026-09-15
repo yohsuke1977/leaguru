@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { getPost } from '../lib/posts'
 import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
+import { MIN_PRICE_LABEL } from '../lib/plans'
 
 export default function BlogPostPage() {
   const { slug } = useParams()
@@ -44,7 +45,7 @@ export default function BlogPostPage() {
         <div className="blog-body" dangerouslySetInnerHTML={{ __html: post.html }} />
         <footer className="blog-cta">
           <h3>Leaguru なら、これ全部がすぐに始められます</h3>
-          <p>順位表・成績・日程・お知らせをまとめて管理。年額¥18,000・30日間の無料トライアル。</p>
+          <p>順位表・成績・日程・お知らせをまとめて管理。年額{MIN_PRICE_LABEL}から・30日間の無料トライアル。</p>
           <Link to="/" className="blog-cta-btn">サービス詳細を見る</Link>
         </footer>
       </article>

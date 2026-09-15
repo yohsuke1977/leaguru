@@ -1,4 +1,5 @@
 import LegalLayout from './LegalLayout'
+import { PLANS } from '../lib/plans'
 
 export default function TokushoPage() {
   const rows: [string, React.ReactNode][] = [
@@ -8,7 +9,9 @@ export default function TokushoPage() {
     ['電話番号',         <a href="/contact" style={{ color: 'inherit' }}>お問い合わせフォームよりご連絡ください</a>],
     ['メールアドレス',   <a href="mailto:support@leaguru.jp">support@leaguru.jp</a>],
     ['販売URL',          <a href="https://leaguru.jp">https://leaguru.jp</a>],
-    ['販売価格',         '¥18,000（税込）/ 1リーグ・年'],
+    ['販売価格',         'リーグの登録チーム数に応じた年額（すべて税込・1リーグあたり）。' +
+                          PLANS.map(pl => `${pl.teamsLabel} ${pl.priceLabel}`).join(' / ') +
+                          '。チーム数はご契約時点の数で判定し、契約期間中に増減しても当該年度の料金は変わりません。'],
     ['代金以外の費用',   '通信費・デバイス費用はお客様のご負担となります'],
     ['支払い方法',       'クレジットカード（Visa / Mastercard / American Express） / Apple Pay / Google Pay'],
     ['支払い時期',       'お申し込み時に即時決済'],
