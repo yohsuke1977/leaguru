@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist-server && node scripts/prerender.mjs",
+    "build": "tsc -b && tsc -p tsconfig.api.json && vite build && vite build --ssr src/entry-server.tsx --outDir dist-server && node scripts/prerender.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
-    "notify-index": "node ../seo-tools/notify-indexing.mjs https://leaguru.jp/sitemap.xml"
+    "notify-index": "node ../seo-tools/notify-indexing.mjs https://leaguru.jp/sitemap.xml",
+    "check:api": "tsc -p tsconfig.api.json"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.106.0",

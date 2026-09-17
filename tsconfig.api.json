@@ -1,0 +1,16 @@
+{
+  // Vercel Functions（api/）の検査用。Vercel 側は moduleResolution node16 で型検査するため、
+  // 相対 import に拡張子（.js）が無いとデプロイ時に落ちる。ローカルの tsconfig.app.json は
+  // src/ しか含まないので、ここで同じ条件を再現して事前に捕まえる。
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "node16",
+    "moduleResolution": "node16",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "include": ["api", "src/lib/plans.ts"]
+}

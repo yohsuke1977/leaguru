@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node'
 import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
-import { isPlanKey, PLAN_BY_KEY, planForTeamCount } from '../src/lib/plans'
+import { isPlanKey, PLAN_BY_KEY, planForTeamCount } from '../src/lib/plans.js'
 
 // apiVersion を明示pin。SDK更新で既定APIが変わると型エラーになり、変更に必ず気づける
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-04-22.dahlia' })
