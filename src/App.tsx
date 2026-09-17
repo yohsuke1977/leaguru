@@ -664,7 +664,7 @@ function ApplicationForm() {
                     ))}
                   </div>
                   <p className="form-note" style={{ marginTop: 6 }}>
-                    チーム数によって料金が変わります。シーズン途中で増減しても、その年の料金は変わりません。
+                    チーム数によって料金が変わります。途中でチームが減っても、その年の料金は変わりません。上限を超えて増える場合は上位プランへの変更が必要です（差額は残り期間の日割り）。
                   </p>
                 </div>
                 {error && <p style={{ color: '#ef4444', fontSize: 13, margin: '8px 0 0' }}>{error}</p>}
