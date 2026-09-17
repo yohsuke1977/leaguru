@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node'
 import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
-import { isPlanKey, PLAN_BY_KEY } from '../src/lib/plans'
+import { isPlanKey, PLAN_BY_KEY, planForTeamCount } from '../src/lib/plans'
 
 // apiVersion を明示pin。SDK更新で既定APIが変わると型エラーになり、変更に必ず気づける
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-04-22.dahlia' })
@@ -23,6 +23,32 @@ async function findUserByEmail(email: string) {
     if (data.users.length < 200) return null
   }
   return null
+}
+
+// 更新時の帯判定用: 直近のシーズン／トーナメントに登録された異なるチーム数の大きい方。
+// teams テーブルの行数は使わない（解散チームが残り続けるため）。
+// シーズンが空のまま（次年度をまだ作っていない）でも、直前の実績で判定する。
+async function countRecentTeams(leagueId: number): Promise<number> {
+  let best = 0
+  const { data: seasons } = await supabase.from('seasons').select('id').eq('league_id', leagueId).order('id', { ascending: false }).limit(5)
+  for (const s of seasons ?? []) {
+    const { data: divs } = await supabase.from('divisions').select('id').eq('season_id', s.id)
+    const divIds = (divs ?? []).map(d => d.id)
+    if (!divIds.length) continue
+    const { data: dt } = await supabase.from('division_teams').select('team_id').in('division_id', divIds)
+    const n = new Set((dt ?? []).map(r => r.team_id)).size
+    if (n > 0) { best = Math.max(best, n); break }
+  }
+  const { data: tours } = await supabase.from('tournaments').select('id').eq('league_id', leagueId).order('id', { ascending: false }).limit(5)
+  for (const t of tours ?? []) {
+    const { data: groups } = await supabase.from('tournament_groups').select('id').eq('tournament_id', t.id)
+    const gIds = (groups ?? []).map(g => g.id)
+    if (!gIds.length) continue
+    const { data: gt } = await supabase.from('tournament_group_teams').select('team_id').in('group_id', gIds)
+    const n = new Set((gt ?? []).map(r => r.team_id)).size
+    if (n > 0) { best = Math.max(best, n); break }
+  }
+  return best
 }
 
 async function getRawBody(req: VercelRequest): Promise<Buffer> {
@@ -161,6 +187,47 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           subject: `【leaguru サービス停止】${league.name}`,
           text: `サービスが停止されました。\n\nリーグ: ${league.name}\nスラグ: ${league.slug}\n30日後にデータ削除予定。`,
         }).catch(err => console.error('Admin suspension notify error:', err))
+      }
+    }
+    return res.json({ received: true })
+  }
+
+  // ── invoice.upcoming: 更新の数日前に届く。実チーム数で帯を見直してから更新させる ──
+  // 途中でチームが減っても年内の料金は据え置き（規約）なので、下げるのはここだけ。
+  // 上げる方向は通常ここに来ない（上限超過は管理画面でブロックしてアップグレードさせている）が、念のため両方向に対応する。
+  if (event.type === 'invoice.upcoming') {
+    const invoice = event.data.object as Stripe.Invoice
+    const customerId = typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.id
+    if (customerId) {
+      const { data: league } = await supabase
+        .from('leagues')
+        .select('id, name, plan, stripe_subscription_id')
+        .eq('stripe_customer_id', customerId)
+        .maybeSingle()
+      // 'standard'（旧一律契約）や 'free' は見直しの対象外
+      if (league?.stripe_subscription_id && isPlanKey(league.plan)) {
+        const teams = await countRecentTeams(league.id)
+        const target = planForTeamCount(teams)
+        if (target.key !== league.plan) {
+          const priceId = process.env[target.envKey]
+          if (!priceId) {
+            console.error(`更新時の帯見直し: Stripe Price 未設定 ${target.envKey}（league ${league.id}）`)
+          } else {
+            const sub = await stripe.subscriptions.retrieve(league.stripe_subscription_id)
+            const item = sub.items.data[0]
+            if (item) {
+              // 更新前なので日割りは発生させない。次の請求からそのまま新プランの金額になる
+              await stripe.subscriptions.update(sub.id, {
+                items: [{ id: item.id, price: priceId }],
+                proration_behavior: 'none',
+              })
+              await supabase.from('leagues').update({ plan: target.key }).eq('id', league.id)
+              console.log(`更新時の帯見直し: ${league.name} ${league.plan}→${target.key}（直近${teams}チーム）`)
+            }
+          }
+        } else {
+          console.log(`更新時の帯見直し: ${league.name} は ${league.plan} のまま（直近${teams}チーム）`)
+        }
       }
     }
     return res.json({ received: true })

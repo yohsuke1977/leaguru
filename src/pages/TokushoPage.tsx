@@ -11,7 +11,7 @@ export default function TokushoPage() {
     ['販売URL',          <a href="https://leaguru.jp">https://leaguru.jp</a>],
     ['販売価格',         'リーグの登録チーム数に応じた年額（すべて税込・1リーグあたり）。' +
                           PLANS.map(pl => `${pl.teamsLabel} ${pl.priceLabel}`).join(' / ') +
-                          '。チーム数はご契約時点の数で判定し、契約期間中に増減しても当該年度の料金は変わりません。'],
+                          '。チーム数はご契約時点の数で判定し、契約期間中に減っても当該年度の料金は変わりません。上限を超えて増える場合は上位プランへの変更が必要で、残り期間分の差額を日割りで請求します。'],
     ['代金以外の費用',   '通信費・デバイス費用はお客様のご負担となります'],
     ['支払い方法',       'クレジットカード（Visa / Mastercard / American Express） / Apple Pay / Google Pay'],
     ['支払い時期',       'お申し込み時に即時決済'],
