@@ -233,6 +233,27 @@
       "done": true,
       "slug": "suspended-game-rules-grass-baseball",
       "publishedAt": "2026-09-11"
+    },
+    {
+      "keyword": "ノーゲームとは",
+      "angle": "検索クエリ「ノーゲームとは」の意図にそのまま答える実用記事（GSC実クエリ由来）",
+      "done": false,
+      "source": "gsc-auto",
+      "addedAt": "2026-09-21"
+    },
+    {
+      "keyword": "ノーゲーム 野球",
+      "angle": "検索クエリ「ノーゲーム 野球」の意図にそのまま答える実用記事（GSC実クエリ由来）",
+      "done": false,
+      "source": "gsc-auto",
+      "addedAt": "2026-09-21"
+    },
+    {
+      "keyword": "得失点とは",
+      "angle": "検索クエリ「得失点とは」の意図にそのまま答える実用記事（GSC実クエリ由来）",
+      "done": false,
+      "source": "gsc-auto",
+      "addedAt": "2026-09-21"
     }
   ]
 }
