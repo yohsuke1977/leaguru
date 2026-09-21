@@ -237,9 +237,11 @@
     {
       "keyword": "ノーゲームとは",
       "angle": "検索クエリ「ノーゲームとは」の意図にそのまま答える実用記事（GSC実クエリ由来）",
-      "done": false,
+      "done": true,
       "source": "gsc-auto",
-      "addedAt": "2026-09-21"
+      "addedAt": "2026-09-21",
+      "slug": "no-game-definition-rules-grassbaseball",
+      "publishedAt": "2026-09-21"
     },
     {
       "keyword": "ノーゲーム 野球",
