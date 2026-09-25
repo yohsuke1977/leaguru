@@ -255,9 +255,11 @@
     {
       "keyword": "得失点とは",
       "angle": "検索クエリ「得失点とは」の意図にそのまま答える実用記事（GSC実クエリ由来）",
-      "done": false,
+      "done": true,
       "source": "gsc-auto",
-      "addedAt": "2026-09-21"
+      "addedAt": "2026-09-21",
+      "slug": "run-scored-allowed-definition-grassbaseball",
+      "publishedAt": "2026-09-25"
     }
   ]
 }
