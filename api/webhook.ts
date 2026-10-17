@@ -41,12 +41,17 @@ async function countRecentTeams(leagueId: number): Promise<number> {
   }
   const { data: tours } = await supabase.from('tournaments').select('id').eq('league_id', leagueId).order('id', { ascending: false }).limit(5)
   for (const t of tours ?? []) {
+    // グループ戦の参加チーム＋決勝（勝ち抜き）の枠のチーム。予選なしの勝ち抜き大会はグループが無い
+    const ids = new Set<number>()
     const { data: groups } = await supabase.from('tournament_groups').select('id').eq('tournament_id', t.id)
     const gIds = (groups ?? []).map(g => g.id)
-    if (!gIds.length) continue
-    const { data: gt } = await supabase.from('tournament_group_teams').select('team_id').in('group_id', gIds)
-    const n = new Set((gt ?? []).map(r => r.team_id)).size
-    if (n > 0) { best = Math.max(best, n); break }
+    if (gIds.length) {
+      const { data: gt } = await supabase.from('tournament_group_teams').select('team_id').in('group_id', gIds)
+      for (const r of gt ?? []) ids.add(r.team_id)
+    }
+    const { data: tg } = await supabase.from('tournament_games').select('team1_id, team2_id').eq('tournament_id', t.id).eq('stage', 'bracket')
+    for (const r of tg ?? []) { if (r.team1_id) ids.add(r.team1_id); if (r.team2_id) ids.add(r.team2_id) }
+    if (ids.size > 0) { best = Math.max(best, ids.size); break }
   }
   return best
 }
