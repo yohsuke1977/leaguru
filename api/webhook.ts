@@ -375,19 +375,39 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   })
 
   // 6. Vercel にサブドメインを追加（SSL自動発行）
+  // 失敗してもリーグ作成は止めない（後から手で追加できる）。その代わり結果を
+  // 申し込み通知メールに載せ、つながらないサブドメインを見落とさないようにする。
+  // 以前は fetch の例外だけを拾っていたため、トークン失効などの 4xx が無言で通っていた
+  const subdomain = `${league.slug}.leaguru.jp`
   const vercelToken = process.env.VERCEL_TOKEN
   const vercelProjectId = process.env.VERCEL_LEAGUE_PROJECT_ID
   const vercelTeamId = process.env.VERCEL_TEAM_ID
+  let domainStatus: string
   if (vercelToken && vercelProjectId) {
     const teamParam = vercelTeamId ? `?teamId=${vercelTeamId}` : ''
-    await fetch(`https://api.vercel.com/v9/projects/${vercelProjectId}/domains${teamParam}`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${vercelToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ name: `${league.slug}.leaguru.jp` }),
-    }).catch(err => console.error('Vercel domain add error:', err))
+    try {
+      const domainRes = await fetch(`https://api.vercel.com/v9/projects/${vercelProjectId}/domains${teamParam}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${vercelToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: subdomain }),
+      })
+      if (domainRes.ok) {
+        domainStatus = '追加済み'
+      } else {
+        const body = await domainRes.json().catch(() => null) as { error?: { code?: string; message?: string } } | null
+        domainStatus = `❌ 失敗（HTTP ${domainRes.status} ${body?.error?.code ?? ''} ${body?.error?.message ?? ''}）`.replace(/\s+）/, '）')
+        console.error('Vercel domain add failed:', subdomain, domainRes.status, body)
+      }
+    } catch (err) {
+      domainStatus = `❌ 失敗（${err instanceof Error ? err.message : String(err)}）`
+      console.error('Vercel domain add error:', subdomain, err)
+    }
+  } else {
+    domainStatus = '❌ 未実行（VERCEL_TOKEN / VERCEL_LEAGUE_PROJECT_ID が未設定）'
+    console.error('Vercel domain add skipped: env not set', subdomain)
   }
 
   // 7. 運営者への申し込み通知
@@ -406,6 +426,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       `契約プラン: ${isPlanKey(planKey) ? `${PLAN_BY_KEY[planKey].teamsLabel} ${PLAN_BY_KEY[planKey].priceLabel}/年` : '不明'}`,
       `スラグ: ${league.slug}`,
       `管理画面: https://${league.slug}.leaguru.jp/admin/login`,
+      `サブドメイン: ${subdomain} ${domainStatus}`,
+      ...(domainStatus === '追加済み' ? [] : [
+        `→ Vercel の league-saas プロジェクトの Domains に ${subdomain} を手で追加してください`,
+      ]),
     ].join('\n'),
   }).catch(err => console.error('Admin notify error:', err))
 
