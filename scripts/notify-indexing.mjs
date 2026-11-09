@@ -121,3 +121,7 @@ for (const url of targets) {
   else console.error(`[notify-index] ✗ ${r.url} — ${r.info}`)
 }
 console.log(`[notify-index] 完了: ${ok}/${targets.length} 件を通知`)
+// 1件でも失敗したら失敗で終える。Actions が赤くなって気づけるように
+// （403＝サービスアカウントが Search Console から外れた／429＝1日の上限。どちらも毎日続くのに、緑のままだと誰も気づかない。
+//   README の IndexNow の節と同じ方針。記事の公開は前の段で済んでいるので、失うのは通知だけ）。seo-tools#2
+if (ok < targets.length) process.exit(1)
