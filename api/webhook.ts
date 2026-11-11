@@ -318,6 +318,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (leagueErr || !created) {
       console.error('League insert error:', leagueErr)
+      // 運営に知らせる（leaguru#6）。ここで止まると、お客さんは無料期間に入ったまま
+      // ウェルカムメールも管理画面も届かず、こちらも気づけない
+      const duplicate = leagueErr?.code === '23505' // slug の重複（leagues_slug_key）
+      await resend.emails.send({
+        from: 'noreply@leaguru.jp',
+        to: 'support@leaguru.jp',
+        subject: `【要対応】リーグ作成失敗 — ${leagueName}`,
+        text: [
+          `決済（無料期間の開始）は済んでいますが、リーグを作れませんでした。`,
+          `お客さんには何も届いていません。手でリーグを作るか、ご本人に連絡してください。`,
+          ``,
+          `リーグ名: ${leagueName}`,
+          `担当者: ${contact}`,
+          `メール: ${email}`,
+          `希望URL: ${chosenSlug || toSlug(leagueName)}`,
+          `Stripe お客さんID: ${stripeCustomerId ?? '不明'}`,
+          `Stripe サブスクリプションID: ${stripeSubscriptionId ?? '不明'}`,
+          `エラー: ${leagueErr?.code ?? ''} ${leagueErr?.message ?? '不明'}`,
+          duplicate ? `\n→ URL が他のリーグと重複しています（申込の取り合い）。別のURLで手作成してください。` : '',
+        ].join('\n'),
+      }).catch(err => console.error('League failure notify error:', err))
+      // 重複は何度やり直しても同じ結果なので、Stripe のやり直しを止める（通知は上で済んだ）。
+      // それ以外（DB の一時的な不調など）は 500 にしてやり直してもらう
+      if (duplicate) return res.json({ received: true, leagueCreated: false })
       return res.status(500).json({ error: 'League creation failed' })
     }
     league = created

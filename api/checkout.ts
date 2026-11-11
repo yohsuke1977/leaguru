@@ -1,6 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import Stripe from 'stripe'
+import { createClient } from '@supabase/supabase-js'
 import { PLAN_BY_KEY, isPlanKey } from '../src/lib/plans.js'
+import { normalizeSlug, slugFormatProblem } from '../src/lib/slug.js'
 
 // apiVersion を明示pin。SDK更新で既定APIが変わると型エラーになり、変更に必ず気づける
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-04-22.dahlia' })
@@ -8,10 +10,28 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-04
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).end()
 
-  const { leagueName, contact, email, phone, size, slug, attribution } = req.body
+  const { leagueName, contact, email, phone, size, attribution } = req.body ?? {}
+  const slug = normalizeSlug(req.body?.slug)
 
   if (!leagueName || !contact || !email || !slug) {
     return res.status(400).json({ error: '必須項目が不足しています' })
+  }
+
+  // URL はブラウザでも確かめているが、決済画面を開く直前にもう一度確かめる（leaguru#6）。
+  // 入力したときに空いていても、その後に別の申込で使われていることがある。
+  // ここで弾かないと、決済後の webhook でリーグ作成が失敗し、お客さんには何も届かない
+  const problem = slugFormatProblem(slug)
+  if (problem) {
+    return res.status(400).json({ error: problem === 'reserved' ? 'このURLは使えません。別のURLを選んでください' : 'URLの形式が正しくありません（半角英小文字・数字・ハイフン、3〜20文字）' })
+  }
+  const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+  const { data: taken, error: takenErr } = await supabase.from('leagues').select('id').eq('slug', slug).maybeSingle()
+  if (takenErr) {
+    console.error('slug 確認失敗:', takenErr)
+    return res.status(500).json({ error: 'エラーが発生しました。時間をおいて再度お試しください' })
+  }
+  if (taken) {
+    return res.status(400).json({ error: 'このURLは使えなくなりました（ほかの申込で使われました）。別のURLを選んでください' })
   }
 
   // リーグ規模＝課金プラン。どのPriceで決済するかが決まるので必須

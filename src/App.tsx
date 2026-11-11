@@ -596,7 +596,13 @@ function ApplicationForm() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...form, attribution }),
     })
-    if (!res.ok) { setError('エラーが発生しました。時間をおいて再度お試しください。'); setLoading(false); return }
+    if (!res.ok) {
+      // 受け口の言葉（URLが使えなくなった等）があればそれを出す
+      const body = await res.json().catch(() => ({}))
+      setError(body.error ?? 'エラーが発生しました。時間をおいて再度お試しください。')
+      setLoading(false)
+      return
+    }
     const { url } = await res.json()
     window.location.href = url
   }

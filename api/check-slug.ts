@@ -1,20 +1,14 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { createClient } from '@supabase/supabase-js'
+import { normalizeSlug, slugFormatProblem } from '../src/lib/slug.js'
 
 const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
 
-const RESERVED = ['www', 'api', 'app', 'demo', 'admin', 'mail', 'smtp', 'sbl', 'support', 'help', 'status', 'blog', 'leaguru']
-
+// 申込フォームの入力中の確認。判定は src/lib/slug.ts（checkout.ts と共通）
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const slug = (req.query.slug as string ?? '').toLowerCase().trim()
-
-  if (!slug) return res.json({ available: false, reason: 'empty' })
-  if (!/^[a-z0-9][a-z0-9-]{1,18}[a-z0-9]$/.test(slug)) {
-    return res.json({ available: false, reason: 'invalid' })
-  }
-  if (RESERVED.includes(slug)) {
-    return res.json({ available: false, reason: 'reserved' })
-  }
+  const slug = normalizeSlug(req.query.slug)
+  const problem = slugFormatProblem(slug)
+  if (problem) return res.json({ available: false, reason: problem })
 
   const { data } = await supabase.from('leagues').select('id').eq('slug', slug).maybeSingle()
   return res.json({ available: !data })
