@@ -273,9 +273,11 @@
     {
       "keyword": "得失点率 計算",
       "angle": "検索クエリ「得失点率 計算」の意図にそのまま答える実用記事（GSC実クエリ由来）",
-      "done": false,
+      "done": true,
       "source": "gsc-auto",
-      "addedAt": "2026-11-09"
+      "addedAt": "2026-11-09",
+      "slug": "run-scoring-rate-calculation-grassbaseball",
+      "publishedAt": "2026-11-13"
     },
     {
       "keyword": "得失点率とは",
