@@ -176,7 +176,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px">
                 <h2 style="color:#c0392b">サービスが停止されました</h2>
                 <p><strong>${league.name}</strong> のサービスが停止されました。</p>
-                <p>現在のデータは<strong>30日間</strong>保持されます。この期間内に再度お申し込みいただくことで、データを引き継いでサービスを再開できます。</p>
+                <p>現在のデータは<strong>30日間</strong>保持されます。再開をご希望の場合は、この期間内に <a href="mailto:support@leaguru.jp">support@leaguru.jp</a> までご連絡ください。データを引き継いで再開します。</p>
+                <p style="color:#666;font-size:13px">※ 申込フォームから新しくお申し込みいただくと、データの入っていない別のリーグになります。</p>
                 <p>30日を過ぎると、すべてのデータが完全に削除されます。</p>
                 <p>ご不明な点はサポートまでお問い合わせください。</p>
                 <hr style="border:none;border-top:1px solid #eee;margin:24px 0">

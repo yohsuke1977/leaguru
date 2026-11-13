@@ -12,5 +12,5 @@
     "noEmit": true,
     "types": ["node"]
   },
-  "include": ["api", "src/lib/plans.ts", "src/lib/slug.ts"]
+  "include": ["api", "src/lib/plans.ts", "src/lib/slug.ts", "src/lib/leagueDeletion.ts"]
 }

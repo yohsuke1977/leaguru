@@ -83,3 +83,17 @@ api/               # Vercel Serverless Functions
 - `App.tsx` にLPの全セクションが入っている（ルーターなし）
 - Stripe Webhook の署名検証あり（`webhook.ts`）
 - Supabase は league-saas と同じインスタンス（ulzqbkighjmnodsukkhh）を使用
+
+---
+
+## 停止したリーグをサポートで再開する手順（leaguru#8・2026-11-13）
+
+停止＝Stripe のサブスク終了（`customer.subscription.deleted`）で `leagues.status='suspended'`・`suspended_at` が入る。
+データは30日後に `api/cleanup.ts`（毎日 UTC 2:00）が消す。**再開する仕組みはコードに無い**ので、連絡が来たら手で戻す。
+
+1. Stripe ダッシュボードで、そのリーグの customer（`leagues.stripe_customer_id`）に**新しいサブスク**を作る
+   - Price は規模に合うもの（`STRIPE_PRICE_*`）。お客さんにカードを入れてもらうなら Customer Portal か請求書払い
+2. Supabase で `leagues` を戻す: `status='active'`・`suspended_at=null`・`stripe_subscription_id=<新しい sub_...>`・`plan`・`current_period_end`
+3. 管理画面の帯（停止中）が消え、`https://<slug>.leaguru.jp/admin` に入れることを確かめる
+- ⚠️ 申込フォームから申し込み直してもらうと、**空の別リーグ**になる（同じ URL は「使えなくなりました」で断られる）。停止メールと管理画面の帯は「support@ に連絡」と案内している
+- ⚠️ 30日を過ぎて cleanup が消した後は戻せない
