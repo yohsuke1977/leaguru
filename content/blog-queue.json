@@ -282,9 +282,11 @@
     {
       "keyword": "得失点率とは",
       "angle": "検索クエリ「得失点率とは」の意図にそのまま答える実用記事（GSC実クエリ由来）",
-      "done": false,
+      "done": true,
       "source": "gsc-auto",
-      "addedAt": "2026-11-09"
+      "addedAt": "2026-11-09",
+      "slug": "run-scoring-rate-definition-practical-guide",
+      "publishedAt": "2026-11-16"
     },
     {
       "keyword": "得失点差 野球",
