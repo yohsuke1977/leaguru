@@ -294,6 +294,34 @@
       "done": false,
       "source": "gsc-auto",
       "addedAt": "2026-11-09"
+    },
+    {
+      "keyword": "得失点差 大きい方がいい",
+      "angle": "検索クエリ「得失点差 大きい方がいい」の意図にそのまま答える実用記事（GSC実クエリ由来）",
+      "done": false,
+      "source": "gsc-auto",
+      "addedAt": "2026-11-16"
+    },
+    {
+      "keyword": "得失点 計算方法",
+      "angle": "検索クエリ「得失点 計算方法」の意図にそのまま答える実用記事（GSC実クエリ由来）",
+      "done": false,
+      "source": "gsc-auto",
+      "addedAt": "2026-11-16"
+    },
+    {
+      "keyword": "同得点",
+      "angle": "検索クエリ「同得点」の意図にそのまま答える実用記事（GSC実クエリ由来）",
+      "done": false,
+      "source": "gsc-auto",
+      "addedAt": "2026-11-16"
+    },
+    {
+      "keyword": "総得点",
+      "angle": "検索クエリ「総得点」の意図にそのまま答える実用記事（GSC実クエリ由来）",
+      "done": false,
+      "source": "gsc-auto",
+      "addedAt": "2026-11-16"
     }
   ]
 }
