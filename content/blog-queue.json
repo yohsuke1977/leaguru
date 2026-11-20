@@ -300,9 +300,11 @@
     {
       "keyword": "得失点差 大きい方がいい",
       "angle": "検索クエリ「得失点差 大きい方がいい」の意図にそのまま答える実用記事（GSC実クエリ由来）",
-      "done": false,
+      "done": true,
       "source": "gsc-auto",
-      "addedAt": "2026-11-16"
+      "addedAt": "2026-11-16",
+      "slug": "run-differential-larger-is-better-why",
+      "publishedAt": "2026-11-20"
     },
     {
       "keyword": "得失点 計算方法",
