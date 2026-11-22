@@ -11,13 +11,26 @@ const resend = new Resend(process.env.RESEND_API_KEY!)
 
 export const config = { api: { bodyParser: false } }
 
-// 途中失敗した申し込みを再開するときの照合用。supabase-js の admin API には
+// データベースの読み書きの失敗（Supabase の一時的な不調など）。
+// これが出たら 500 を返して Stripe にやり直してもらう（leaguru#10）。
+// 「見つからなかった」と「読めなかった」を取り違えないために、エラーは必ずここへ通す
+class DbError extends Error {}
+function check(error: { message: string; code?: string } | null, what: string) {
+  if (error) throw new DbError(`${what}: ${error.code ?? ''} ${error.message}`)
+}
+
+// 申込で新しく作ったアカウントの目印。やり直し（同じ申込の再入）のときだけ
+// 仮パスワードを作り直してよい。それ以外の既存アカウントのパスワードは変えない（leaguru#9）
+const CHECKOUT_MARK = 'leaguru_checkout_session'
+
+// 既存アカウントの照合用。supabase-js の admin API には
 // メールでの検索が無いのでページングして探す（登録ユーザー数は少ない想定）
 async function findUserByEmail(email: string) {
   const target = email.toLowerCase()
   for (let page = 1; page <= 20; page++) {
     const { data, error } = await supabase.auth.admin.listUsers({ page, perPage: 200 })
-    if (error || !data?.users?.length) return null
+    check(error, 'ユーザー一覧の取得')
+    if (!data?.users?.length) return null
     const hit = data.users.find(u => u.email?.toLowerCase() === target)
     if (hit) return hit
     if (data.users.length < 200) return null
@@ -28,28 +41,36 @@ async function findUserByEmail(email: string) {
 // 更新時の帯判定用: 直近のシーズン／トーナメントに登録された異なるチーム数の大きい方。
 // teams テーブルの行数は使わない（解散チームが残り続けるため）。
 // シーズンが空のまま（次年度をまだ作っていない）でも、直前の実績で判定する。
+// ⚠️ 読み取りの失敗は投げる。0チーム扱いにすると、DB の不調で一番安い帯へ勝手に下げてしまう
 async function countRecentTeams(leagueId: number): Promise<number> {
   let best = 0
-  const { data: seasons } = await supabase.from('seasons').select('id').eq('league_id', leagueId).order('id', { ascending: false }).limit(5)
+  const { data: seasons, error: e1 } = await supabase.from('seasons').select('id').eq('league_id', leagueId).order('id', { ascending: false }).limit(5)
+  check(e1, 'シーズンの取得')
   for (const s of seasons ?? []) {
-    const { data: divs } = await supabase.from('divisions').select('id').eq('season_id', s.id)
+    const { data: divs, error: e2 } = await supabase.from('divisions').select('id').eq('season_id', s.id)
+    check(e2, '部門の取得')
     const divIds = (divs ?? []).map(d => d.id)
     if (!divIds.length) continue
-    const { data: dt } = await supabase.from('division_teams').select('team_id').in('division_id', divIds)
+    const { data: dt, error: e3 } = await supabase.from('division_teams').select('team_id').in('division_id', divIds)
+    check(e3, '部門のチームの取得')
     const n = new Set((dt ?? []).map(r => r.team_id)).size
     if (n > 0) { best = Math.max(best, n); break }
   }
-  const { data: tours } = await supabase.from('tournaments').select('id').eq('league_id', leagueId).order('id', { ascending: false }).limit(5)
+  const { data: tours, error: e4 } = await supabase.from('tournaments').select('id').eq('league_id', leagueId).order('id', { ascending: false }).limit(5)
+  check(e4, 'トーナメントの取得')
   for (const t of tours ?? []) {
     // グループ戦の参加チーム＋決勝（勝ち抜き）の枠のチーム。予選なしの勝ち抜き大会はグループが無い
     const ids = new Set<number>()
-    const { data: groups } = await supabase.from('tournament_groups').select('id').eq('tournament_id', t.id)
+    const { data: groups, error: e5 } = await supabase.from('tournament_groups').select('id').eq('tournament_id', t.id)
+    check(e5, 'グループの取得')
     const gIds = (groups ?? []).map(g => g.id)
     if (gIds.length) {
-      const { data: gt } = await supabase.from('tournament_group_teams').select('team_id').in('group_id', gIds)
+      const { data: gt, error: e6 } = await supabase.from('tournament_group_teams').select('team_id').in('group_id', gIds)
+      check(e6, 'グループのチームの取得')
       for (const r of gt ?? []) ids.add(r.team_id)
     }
-    const { data: tg } = await supabase.from('tournament_games').select('team1_id, team2_id').eq('tournament_id', t.id).eq('stage', 'bracket')
+    const { data: tg, error: e7 } = await supabase.from('tournament_games').select('team1_id, team2_id').eq('tournament_id', t.id).eq('stage', 'bracket')
+    check(e7, '決勝の枠の取得')
     for (const r of tg ?? []) { if (r.team1_id) ids.add(r.team1_id); if (r.team2_id) ids.add(r.team2_id) }
     if (ids.size > 0) { best = Math.max(best, ids.size); break }
   }
@@ -90,23 +111,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'Invalid signature' })
   }
 
+  // DB の読み書きが失敗したら（DbError ほか想定外の例外も）500 を返して Stripe にやり直してもらう。
+  // 以前は失敗を見ずに 200 を返していたため、やり直しも運営への連絡も起きなかった（leaguru#10）
+  try {
+    return await route(event, res)
+  } catch (err) {
+    console.error(`webhook ${event.type} ${event.id} が失敗（Stripe がやり直す）:`, err)
+    if (!res.headersSent) return res.status(500).json({ error: 'Temporary failure' })
+  }
+}
+
+async function route(event: Stripe.Event, res: VercelResponse) {
   // ── invoice.payment_failed ──────────────────────────────────────────────
   if (event.type === 'invoice.payment_failed') {
     const invoice = event.data.object as Stripe.Invoice
     const customerId = typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.id
     if (customerId) {
-      const { data: league } = await supabase
+      const { data: league, error: lErr } = await supabase
         .from('leagues')
         .select('id, name, slug')
         .eq('stripe_customer_id', customerId)
         .maybeSingle()
+      check(lErr, 'リーグの取得')
       if (league) {
-        const { data: settings } = await supabase
+        const { data: settings, error: sErr } = await supabase
           .from('site_settings')
           .select('value')
           .eq('league_id', league.id)
           .eq('key', 'contact_email')
           .maybeSingle()
+        check(sErr, '連絡先メールの取得')
         const adminEmail = (settings as { value: string } | null)?.value
         if (adminEmail) {
           await resend.emails.send({
@@ -135,11 +169,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const sub = event.data.object as Stripe.Subscription
     const customerId = typeof sub.customer === 'string' ? sub.customer : sub.customer?.id
     if (customerId) {
-      await supabase.from('leagues').update({
-        stripe_subscription_id: sub.id,
-        current_period_end: subPeriodEndISO(sub),
-        cancel_at_period_end: sub.cancel_at_period_end,
+      // 通知の中身ではなく、いまの契約を Stripe に聞いてから書く。
+      // 失敗→やり直しの間に新しい通知が先に処理されていても、古い内容で上書きしない
+      const latest = await stripe.subscriptions.retrieve(sub.id)
+      const { error } = await supabase.from('leagues').update({
+        stripe_subscription_id: latest.id,
+        current_period_end: subPeriodEndISO(latest),
+        cancel_at_period_end: latest.cancel_at_period_end,
       }).eq('stripe_customer_id', customerId)
+      check(error, '契約期間の更新')
     }
     return res.json({ received: true })
   }
@@ -149,23 +187,49 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const subscription = event.data.object as Stripe.Subscription
     const customerId = typeof subscription.customer === 'string' ? subscription.customer : subscription.customer?.id
     if (customerId) {
-      const { data: league } = await supabase
+      const { data: league, error: lErr } = await supabase
         .from('leagues')
-        .select('id, name, slug')
+        .select('id, name, slug, status')
         .eq('stripe_customer_id', customerId)
         .maybeSingle()
+      check(lErr, 'リーグの取得')
       if (league) {
-        await supabase
-          .from('leagues')
-          .update({ status: 'suspended', suspended_at: new Date().toISOString() })
-          .eq('id', league.id)
+        // やり直しで来たときに停止日（＝30日後の削除の起点）を後ろへずらさない
+        if (league.status !== 'suspended') {
+          const { error: upErr } = await supabase
+            .from('leagues')
+            .update({ status: 'suspended', suspended_at: new Date().toISOString() })
+            .eq('id', league.id)
+          if (upErr) {
+            // 停止を記録できないと、リーグは無料で動き続け、30日後の削除の対象にもならない。
+            // お客さんへの「停止しました」は送らずに 500 を返す（Stripe がやり直す）。
+            // やり直しても直らないときのために、運営にも毎回知らせる
+            await resend.emails.send({
+              from: 'noreply@leaguru.jp',
+              to: 'support@leaguru.jp',
+              subject: `【要対応】サービス停止の記録に失敗 — ${league.name}`,
+              text: [
+                `Stripe の契約は終了しましたが、リーグを停止状態にできませんでした。`,
+                `Stripe が時間をおいてやり直します。数日続く場合は、Supabase で leagues を手で直してください:`,
+                `  status='suspended', suspended_at=<今の日時>（id=${league.id}）`,
+                `お客さんへの停止のお知らせは、まだ送っていません。`,
+                ``,
+                `リーグ: ${league.name}`,
+                `スラグ: ${league.slug}`,
+                `エラー: ${upErr.code ?? ''} ${upErr.message}`,
+              ].join('\n'),
+            }).catch(err => console.error('Suspension failure notify error:', err))
+            throw new DbError(`停止の記録: ${upErr.code ?? ''} ${upErr.message}`)
+          }
+        }
 
-        const { data: settings } = await supabase
+        const { data: settings, error: sErr } = await supabase
           .from('site_settings')
           .select('value')
           .eq('league_id', league.id)
           .eq('key', 'contact_email')
           .maybeSingle()
+        check(sErr, '連絡先メールの取得')
         const adminEmail = (settings as { value: string } | null)?.value
         if (adminEmail) {
           await resend.emails.send({
@@ -205,11 +269,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const invoice = event.data.object as Stripe.Invoice
     const customerId = typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.id
     if (customerId) {
-      const { data: league } = await supabase
+      const { data: league, error: lErr } = await supabase
         .from('leagues')
         .select('id, name, plan, stripe_subscription_id')
         .eq('stripe_customer_id', customerId)
         .maybeSingle()
+      check(lErr, 'リーグの取得')
       // 'standard'（旧一律契約）や 'free' は見直しの対象外
       if (league?.stripe_subscription_id && isPlanKey(league.plan)) {
         const teams = await countRecentTeams(league.id)
@@ -227,7 +292,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 items: [{ id: item.id, price: priceId }],
                 proration_behavior: 'none',
               })
-              await supabase.from('leagues').update({ plan: target.key }).eq('id', league.id)
+              // 失敗したら 500 → やり直しで Stripe 側をもう一度同じ価格にし（変化なし）、ここを書き直す
+              const { error: pErr } = await supabase.from('leagues').update({ plan: target.key }).eq('id', league.id)
+              check(pErr, '料金帯の記録')
               console.log(`更新時の帯見直し: ${league.name} ${league.plan}→${target.key}（直近${teams}チーム）`)
             }
           }
@@ -270,23 +337,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const stripeCustomerId = typeof session.customer === 'string' ? session.customer : session.customer?.id
   const stripeSubscriptionId = typeof session.subscription === 'string' ? session.subscription : session.subscription?.id ?? null
 
+  // ⚠️ 読めなかったときに「無い」と扱うと、リーグの二重作成やウェルカムメールの二重送信になる
   let league: { id: number; slug: string } | null = null
   if (stripeSubscriptionId) {
-    const { data: found } = await supabase
+    const { data: found, error: fErr } = await supabase
       .from('leagues')
       .select('id, slug')
       .eq('stripe_subscription_id', stripeSubscriptionId)
       .maybeSingle()
+    check(fErr, '申込済みリーグの取得')
     league = found ?? null
   }
 
   if (league) {
     // 管理者まで作られていれば完全に完了済み。仮パスワードの再発行もメール再送もしない
-    const { data: provisioned } = await supabase
+    const { data: provisioned, error: pErr } = await supabase
       .from('league_admins')
       .select('user_id')
       .eq('league_id', league.id)
       .limit(1)
+    check(pErr, '管理者の紐付けの取得')
     if (provisioned?.length) {
       console.log('処理済みの申し込みのためスキップ:', session.id, 'league_id=', league.id)
       return res.json({ received: true, duplicate: true })
@@ -349,32 +419,41 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   // 2. site_settings 初期化（再開時に二重登録しない）
-  const { data: existingSettings } = await supabase
+  // contact_email が無いと、支払い失敗・停止のお知らせが黙って送られなくなる。
+  // 失敗したら 500 → やり直しで、ここから続きを再開する（leaguru#10）
+  const { data: existingSettings, error: esErr } = await supabase
     .from('site_settings')
     .select('key')
     .eq('league_id', league.id)
     .limit(1)
+  check(esErr, 'サイト設定の取得')
   if (!existingSettings?.length) {
-    await supabase.from('site_settings').insert([
+    const { error: insErr } = await supabase.from('site_settings').insert([
       { key: 'site_title', value: leagueName, league_id: league.id },
       { key: 'layout', value: 'standard', league_id: league.id },
       { key: 'team_admin_enabled', value: 'false', league_id: league.id },
       { key: 'contact_email', value: email, league_id: league.id },
     ])
+    check(insErr, 'サイト設定の登録')
   }
 
   // 3. 仮パスワード生成
   const tmpPassword = Math.random().toString(36).slice(2, 8).toUpperCase() +
     Math.random().toString(36).slice(2, 8) + '!'
 
-  // 4. 管理者アカウント作成
-  // 再開時は同じメールのユーザーが既にできていることがある。その場合は作り直さず
-  // 仮パスワードだけ再設定して使い回す（ウェルカムメールの記載と一致させるため）
+  // 4. 管理者アカウント
+  // - 新しいメール → アカウントを作り、仮パスワードを送る。この申込で作った目印を付けておく
+  // - この申込のやり直しで、前回このアカウントを作っていた → 仮パスワードだけ作り直す
+  //   （前回の仮パスワードはメールで届いていないので）
+  // - それ以外の既存アカウント（チーム管理者・別のリーグの管理者など）→ パスワードは変えず、
+  //   新しいリーグにつなぐだけ。ウェルカムメールは「今のパスワードで」と案内する（leaguru#9）
   let adminUserId: string
+  let passwordToSend: string | null = tmpPassword
   const { data: authUser, error: authErr } = await supabase.auth.admin.createUser({
     email,
     password: tmpPassword,
     email_confirm: true,
+    app_metadata: { [CHECKOUT_MARK]: session.id },
   })
 
   if (authUser?.user) {
@@ -385,19 +464,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       console.error('Auth user error:', authErr)
       return res.status(500).json({ error: 'User creation failed' })
     }
-    const { error: pwErr } = await supabase.auth.admin.updateUserById(existingUser.id, { password: tmpPassword })
-    if (pwErr) {
-      console.error('Auth password reset error:', pwErr)
-      return res.status(500).json({ error: 'User creation failed' })
-    }
     adminUserId = existingUser.id
+    if (existingUser.app_metadata?.[CHECKOUT_MARK] === session.id) {
+      const { error: pwErr } = await supabase.auth.admin.updateUserById(existingUser.id, { password: tmpPassword })
+      if (pwErr) {
+        console.error('Auth password reset error:', pwErr)
+        return res.status(500).json({ error: 'User creation failed' })
+      }
+    } else {
+      passwordToSend = null
+      console.log('既存アカウントを新しいリーグにつなぐ（パスワードは変えない）:', league.slug, adminUserId)
+    }
   }
 
   // 5. league_admins に紐付け
-  await supabase.from('league_admins').insert({
+  // 失敗すると、ログインできても管理画面が使えない。ウェルカムメールの前に 500 を返し、
+  // やり直しで続きから再開する（leaguru#10）
+  const { error: laErr } = await supabase.from('league_admins').insert({
     user_id: adminUserId,
     league_id: league.id,
   })
+  check(laErr, '管理者の紐付け')
 
   // 6. Vercel にサブドメインを追加（SSL自動発行）
   // 失敗してもリーグ作成は止めない（後から手で追加できる）。その代わり結果を
@@ -452,6 +539,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       `スラグ: ${league.slug}`,
       `管理画面: https://${league.slug}.leaguru.jp/admin/login`,
       `サブドメイン: ${subdomain} ${domainStatus}`,
+      `管理者アカウント: ${passwordToSend ? '新規作成（仮パスワードを送信）' : '既存アカウントにつないだ（パスワードは変えていない）'}`,
       ...(domainStatus === '追加済み' ? [] : [
         `→ Vercel の league-saas プロジェクトの Domains に ${subdomain} を手で追加してください`,
       ]),
@@ -475,10 +563,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         <div style="background:#f4f6fa;border-radius:8px;padding:16px 20px;margin:20px 0;font-size:14px">
           <p style="margin:0 0 8px"><strong>管理画面URL:</strong> <a href="https://${league.slug}.leaguru.jp/admin/login">https://${league.slug}.leaguru.jp/admin/login</a></p>
           <p style="margin:0 0 8px"><strong>ログインメールアドレス:</strong> ${email}</p>
-          <p style="margin:0"><strong>仮パスワード:</strong> <span style="font-family:monospace;background:#e8f0e8;padding:2px 8px;border-radius:4px">${tmpPassword}</span></p>
+          ${passwordToSend
+            ? `<p style="margin:0"><strong>仮パスワード:</strong> <span style="font-family:monospace;background:#e8f0e8;padding:2px 8px;border-radius:4px">${passwordToSend}</span></p>`
+            : `<p style="margin:0"><strong>パスワード:</strong> このメールアドレスのアカウントはすでにお持ちです。今お使いのパスワードでログインできます。</p>`}
         </div>
         <p style="color:#888;font-size:13px">※URLが有効になるまで数分かかる場合があります。しばらく経ってからアクセスしてください。</p>
-        <p style="color:#888;font-size:13px">※初回ログイン後にパスワードの変更をお勧めします。</p>
+        ${passwordToSend
+          ? `<p style="color:#888;font-size:13px">※初回ログイン後にパスワードの変更をお勧めします。</p>`
+          : `<p style="color:#888;font-size:13px">※パスワードをお忘れの場合は <a href="mailto:support@leaguru.jp">support@leaguru.jp</a> までご連絡ください。</p>`}
         <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
         <p style="color:#555;font-size:13px">
           リーグ名: ${leagueName}<br>
@@ -505,8 +597,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         `スラグ: ${league.slug}`,
         `管理画面: https://${league.slug}.leaguru.jp/admin/login`,
         ``,
-        `仮パスワードは再現できないため、Supabaseからパスワード再設定を行い、`,
-        `ログイン情報を手動で案内してください。`,
+        ...(passwordToSend
+          ? [`仮パスワードは再現できないため、Supabaseからパスワード再設定を行い、`,
+             `ログイン情報を手動で案内してください。`]
+          : [`既存アカウントにつないだので、パスワードはご本人が今お使いのものです。`,
+             `管理画面のURLだけ手動で案内してください。`]),
       ].join('\n'),
     }).catch(err => console.error('サポート通知も失敗:', err))
   }
