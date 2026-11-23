@@ -225,7 +225,7 @@ function TournamentShowcase() {
 function AdminShowcase() {
   const callouts = [
     { ic: 'ball',      title: 'スコアを入力するだけ', desc: '打数・安打・打点を入力すれば、個人成績ランキングも順位表も自動で更新されます。' },
-    { ic: 'calendar',  title: '日程は簡単入力',       desc: '試合日程はフォームから数クリックで登録・変更。変更はすぐに公式サイトへ反映されます。' },
+    { ic: 'spark',     title: 'スコアブックを撮るだけ', desc: '紙のスコアブックを写真で撮ると、スコアと打撃・投手成績を読み取って下書きにします。確かめて保存するだけです。' },
     { ic: 'megaphone', title: 'お知らせを一斉発信',   desc: 'ルール変更や雨天中止など、リーグからの連絡を選手・ご家族にウェブで一斉発信できます。' },
     { ic: 'settings',  title: 'チーム管理者へ権限委譲', desc: '各チームの担当者に管理者権限を招待で付与。試合結果の入力を分担できます。リーグ管理者が承認するまで公開されません。' },
   ]
@@ -251,6 +251,12 @@ function AdminShowcase() {
               <div><h4>{c.title}</h4><p>{c.desc}</p></div>
             </div>
           ))}
+        </div>
+        <div style={{ textAlign: 'center', marginTop: 32 }}>
+          <a className="btn btn-ghost btn-lg" href="https://demo.leaguru.jp/admin/login" target="_blank" rel="noopener noreferrer">
+            <Icon name="play" size={14} /> 管理画面デモを試す
+          </a>
+          <p style={{ fontSize: 13, color: 'var(--muted, #6b7280)', marginTop: 8 }}>登録不要。デモ用のリーグで、実際の管理画面を見られます。</p>
         </div>
       </div>
     </section>
