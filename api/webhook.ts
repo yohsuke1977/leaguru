@@ -38,12 +38,45 @@ async function findUserByEmail(email: string) {
   return null
 }
 
-// 更新時の帯判定用: 直近のシーズン／トーナメントに登録された異なるチーム数の大きい方。
+// 更新時の帯判定用。次のうち一番大きい数（league-saas#42）:
+//  - 進行中（status='active'）のシーズン全体に登録された異なるチーム数（クラスごとにシーズンを分けても合計する）
+//  - 直近のシーズン1つのチーム数（シーズンが空のまま＝次年度をまだ作っていないときも、直前の実績で判定する）
+//  - 過去1年に試合をしたチーム数（試合日で数える。シーズンを「終了」にしてから足す抜け道を拾う）
+//  - 直近のトーナメント1つのチーム数
 // teams テーブルの行数は使わない（解散チームが残り続けるため）。
-// シーズンが空のまま（次年度をまだ作っていない）でも、直前の実績で判定する。
 // ⚠️ 読み取りの失敗は投げる。0チーム扱いにすると、DB の不調で一番安い帯へ勝手に下げてしまう
-async function countRecentTeams(leagueId: number): Promise<number> {
+export async function countRecentTeams(leagueId: number): Promise<number> {
   let best = 0
+  {
+    const { data: active, error } = await supabase.from('seasons').select('id').eq('league_id', leagueId).eq('status', 'active')
+    check(error, '進行中シーズンの取得')
+    const ids = (active ?? []).map(s => s.id)
+    if (ids.length) {
+      const { data: divs, error: e2 } = await supabase.from('divisions').select('id').in('season_id', ids)
+      check(e2, '進行中シーズンの部門の取得')
+      const divIds = (divs ?? []).map(d => d.id)
+      if (divIds.length) {
+        const { data: dt, error: e3 } = await supabase.from('division_teams').select('team_id').in('division_id', divIds)
+        check(e3, '進行中シーズンのチームの取得')
+        best = Math.max(best, new Set((dt ?? []).map(r => r.team_id)).size)
+      }
+    }
+  }
+  {
+    // 試合日は日程（schedules.game_date）にある。games.created_at は過去データの取り込みで今年の日付になっていることがあるので使わない
+    const since = new Date(Date.now() - 365 * 86400_000).toISOString().slice(0, 10)
+    const played = new Set<number>()
+    for (let from = 0; ; from += 1000) {
+      const { data: gs, error } = await supabase.from('games')
+        .select('team1_id, team2_id, schedules!inner(game_date)')
+        .eq('league_id', leagueId).gte('schedules.game_date', since)
+        .order('id').range(from, from + 999)
+      check(error, '過去1年の試合の取得')
+      for (const g of gs ?? []) { if (g.team1_id) played.add(g.team1_id); if (g.team2_id) played.add(g.team2_id) }
+      if (!gs || gs.length < 1000) break
+    }
+    best = Math.max(best, played.size)
+  }
   const { data: seasons, error: e1 } = await supabase.from('seasons').select('id').eq('league_id', leagueId).order('id', { ascending: false }).limit(5)
   check(e1, 'シーズンの取得')
   for (const s of seasons ?? []) {
