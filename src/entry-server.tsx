@@ -5,6 +5,8 @@ import AppRoutes from './AppRoutes.tsx'
 import { posts, getPost } from './lib/posts.ts'
 
 export { posts }
+// 構造化データ（prerender の JSON-LD）の価格を plans.ts から取るため
+export { PLANS } from './lib/plans'
 
 // ビルド時プリレンダリング用。指定URLのHTML文字列を返す（ブラウザ不要）。
 export function render(url: string): string {

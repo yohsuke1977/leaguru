@@ -16,7 +16,7 @@ if (!template.includes('<div id="root"></div>')) {
   process.exit(1)
 }
 
-const { render, getMeta, posts } = await import(path.join(root, 'dist-server/entry-server.js'))
+const { render, getMeta, posts, PLANS } = await import(path.join(root, 'dist-server/entry-server.js'))
 
 // 静的ルート（/success は決済後ページなのでSEO不要・除外）＋ ブログ記事を動的に追加
 const baseRoutes = ['/', '/operator', '/contact', '/blog', '/terms', '/privacy', '/tokusho']
@@ -60,7 +60,13 @@ function buildJsonLd(url) {
       operatingSystem: 'Web',
       description: '草野球・少年野球リーグ向けの公式サイト作成・運営管理サービス。順位表・日程・試合結果・個人成績・トーナメント表を自動集計/公開できる。',
       url: SITE,
-      offers: { '@type': 'Offer', price: '18000', priceCurrency: 'JPY', description: '年額18,000円（税込）/ リーグ・30日間無料トライアル' },
+      // 価格は src/lib/plans.ts から（手で書くと改定時に取り残される。2026-09-15改定後も18,000円のままだった）
+      offers: {
+        '@type': 'AggregateOffer', priceCurrency: 'JPY',
+        lowPrice: String(Math.min(...PLANS.map(p => p.price))), highPrice: String(Math.max(...PLANS.map(p => p.price))),
+        offerCount: String(PLANS.length),
+        description: '年額（税込）・チーム数で3段階（' + PLANS.map(p => `${p.teamsLabel} ${p.priceLabel}`).join('／') + '）/ リーグ・30日間無料トライアル',
+      },
       publisher: PUBLISHER,
     }))
     tags.push(jsonLdTag({

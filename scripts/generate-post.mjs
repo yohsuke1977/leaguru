@@ -29,6 +29,10 @@ function loadEnv(p) {
 loadEnv(path.join(ROOT, '.env'));
 
 const API_KEY = process.env.ANTHROPIC_API_KEY;
+// 記事に書く価格は src/lib/plans.ts から取る（手で書くと改定時に取り残される）
+const PRICE_LABELS = [...fs.readFileSync(path.join(ROOT, 'src/lib/plans.ts'), 'utf8').matchAll(/priceLabel: '([^']+)'/g)].map((m) => m[1]);
+if (!PRICE_LABELS.length) throw new Error('src/lib/plans.ts から価格を読めませんでした');
+const MIN_PRICE = PRICE_LABELS[0];
 if (!API_KEY) { console.error('ANTHROPIC_API_KEY 未設定'); process.exit(1); }
 
 // --- 既存記事（重複回避） ---
@@ -65,7 +69,7 @@ const SYSTEM = `あなたは草野球リーグ運営SaaS「Leaguru」の公式�
    > - （要点3）
 2. 導入の段落（2〜3段落）。
 3. 本文は ## の見出しで3〜6セクション。各セクションは具体・箇条書きも活用。一般論でなく現場の実感。
-4. ## まとめ （箇条書きの要点 + 最後に Leaguru を"押し付けずに"自然に一度だけ紹介。年額¥18,000で始められる旨を1文。）
+4. ## まとめ （箇条書きの要点 + 最後に Leaguru を"押し付けずに"自然に一度だけ紹介。年額${MIN_PRICE}から（チーム数で3段階）始められる旨を1文。）
 5. ## よくある質問 に ### Q. 形式で3問。各回答は検索エンジン/LLMが引用しやすい自然文で。1問はLeaguruに軽く触れてよい。
 
 守ること:
