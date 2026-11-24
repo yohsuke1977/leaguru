@@ -39,8 +39,20 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: node scripts/generate-post.mjs
 
+      # push の前に本番と同じビルドを試す（Issue #12）。記事1本のせいでビルドが落ちると、
+      # 直すまで LP の修正も含めて何も本番に出せなくなるため。落ちたら公開せず赤で終わる
+      #（ネタは未消化のまま残る＝検品で落ちたときと同じ扱い）
+      - name: Build check
+        if: steps.gen.outputs.slug != ''
+        run: |
+          npm ci
+          npm run build
+
       # 生成された記事とqueueをコミットして push（Vercelが自動でデプロイ）
       - name: Commit & push
+        env:
+          # タイトルは命令文に直接埋め込まない（「"」で止まる・`$(...)` が動くのを防ぐ。Issue #12）
+          TITLE: ${{ steps.gen.outputs.title }}
         run: |
           git config user.name  "leaguru-blog-bot"
           git config user.email "5418073+yohsuke1977@users.noreply.github.com"
@@ -48,7 +60,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "no changes"; exit 0
           fi
-          git commit -m "blog: ${{ steps.gen.outputs.title }} (auto)"
+          git commit -m "blog: $TITLE (auto)"
           git push
 
       # 新記事URLを Google Indexing API に直接通知（sitemap反映前でも効くよう直指定）

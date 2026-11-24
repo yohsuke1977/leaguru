@@ -136,6 +136,8 @@ function gate(a) {
   if (!a.title || a.title.length < 15 || a.title.length > 50) errs.push(`titleが${a.title?.length}字(28〜40字にすること)`);
   if (existingTitles.includes((a.title || '').trim())) errs.push('title重複');
   if (!a.description || a.description.length < 50 || a.description.length > 160) errs.push(`descriptionが${a.description?.length}字(70〜140字にすること)`);
+  // 改行は記事の先頭の欄と GITHUB_OUTPUT（slug=/title= の1行ずつ）を壊すので落とす（Issue #12）
+  if (/[\r\n]/.test(a.title || '') || /[\r\n]/.test(a.description || '')) errs.push('titleかdescriptionに改行がある(1行にすること)');
   if (!Array.isArray(a.tags) || a.tags.length < 1 || a.tags.length > 4) errs.push('tags数異常');
   const body = a.body || '';
   if (body.length < 1500) errs.push(`本文が短い(${body.length}字)`);
