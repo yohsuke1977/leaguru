@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import Icon from './components/Icon'
 import './leaguru.css'
 import { PLANS, PLAN_BY_KEY, isPlanKey, MIN_PRICE_LABEL } from './lib/plans'
+import { APPLY_MAX } from './lib/applyInput'
 
 const ACCENT = { accent: '#ef7f2c', accentSoft: '#fde7d4', accentDeep: '#c9601a', accentInk: '#ffffff' }
 
@@ -642,10 +643,10 @@ function ApplicationForm() {
                   <h3 style={{ margin: 0, fontSize: 18, color: 'var(--navy-900)' }}>申込フォーム</h3>
                   <span style={{ fontSize: 12, color: 'var(--muted)' }}>年額 {MIN_PRICE_LABEL}〜(税込) · 30日間無料トライアル</span>
                 </div>
-                <div className="form-row"><label>リーグ名 <span className="req">必須</span></label><input type="text" required value={form.leagueName} onChange={e => set('leagueName', e.target.value)} placeholder="例:多摩川草野球リーグ" /></div>
-                <div className="form-row"><label>担当者名 <span className="req">必須</span></label><input type="text" required value={form.contact} onChange={e => set('contact', e.target.value)} placeholder="例:山田 太郎" /></div>
-                <div className="form-row"><label>メールアドレス <span className="req">必須</span></label><input type="email" required value={form.email} onChange={e => set('email', e.target.value)} placeholder="example@league.jp" /></div>
-                <div className="form-row"><label>電話番号 <span className="opt">任意</span></label><input type="tel" value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="090-0000-0000" /></div>
+                <div className="form-row"><label>リーグ名 <span className="req">必須</span></label><input type="text" required value={form.leagueName} onChange={e => set('leagueName', e.target.value)} maxLength={APPLY_MAX.leagueName} placeholder="例:多摩川草野球リーグ" /></div>
+                <div className="form-row"><label>担当者名 <span className="req">必須</span></label><input type="text" required value={form.contact} onChange={e => set('contact', e.target.value)} maxLength={APPLY_MAX.contact} placeholder="例:山田 太郎" /></div>
+                <div className="form-row"><label>メールアドレス <span className="req">必須</span></label><input type="email" required value={form.email} onChange={e => set('email', e.target.value)} maxLength={APPLY_MAX.email} placeholder="example@league.jp" /></div>
+                <div className="form-row"><label>電話番号 <span className="opt">任意</span></label><input type="tel" value={form.phone} onChange={e => set('phone', e.target.value)} maxLength={APPLY_MAX.phone} placeholder="090-0000-0000" /></div>
                 <div className="form-row">
                   <label>サイトURL <span className="req">必須</span></label>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>

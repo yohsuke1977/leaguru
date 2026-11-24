@@ -3,6 +3,7 @@ import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
 import { PLAN_BY_KEY, isPlanKey } from '../src/lib/plans.js'
 import { normalizeSlug, slugFormatProblem } from '../src/lib/slug.js'
+import { applyInputProblem } from '../src/lib/applyInput.js'
 
 // apiVersion を明示pin。SDK更新で既定APIが変わると型エラーになり、変更に必ず気づける
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-04-22.dahlia' })
@@ -15,6 +16,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (!leagueName || !contact || !email || !slug) {
     return res.status(400).json({ error: '必須項目が不足しています' })
+  }
+
+  // 長すぎる入力は Stripe の metadata 上限（500文字）で決済画面の作成ごと落ちるので、先に分かる言葉で断る（leaguru#11）
+  const inputProblem = applyInputProblem({ leagueName, contact, email, phone })
+  if (inputProblem) {
+    return res.status(400).json({ error: inputProblem })
   }
 
   // URL はブラウザでも確かめているが、決済画面を開く直前にもう一度確かめる（leaguru#6）。

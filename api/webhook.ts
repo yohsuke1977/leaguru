@@ -3,6 +3,7 @@ import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { isPlanKey, PLAN_BY_KEY, planForTeamCount } from '../src/lib/plans.js'
+import { escapeHtml } from '../src/lib/applyInput.js'
 
 // apiVersion を明示pin。SDK更新で既定APIが変わると型エラーになり、変更に必ず気づける
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-04-22.dahlia' })
@@ -183,7 +184,7 @@ async function route(event: Stripe.Event, res: VercelResponse) {
             html: `
               <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px">
                 <h2 style="color:#c0392b">お支払いに失敗しました</h2>
-                <p><strong>${league.name}</strong> の定期支払いが処理できませんでした。</p>
+                <p><strong>${escapeHtml(league.name)}</strong> の定期支払いが処理できませんでした。</p>
                 <p>クレジットカード情報をご確認のうえ、お早めにお支払い方法を更新してください。</p>
                 <p>支払いが完了しない場合、サービスが停止される場合があります。</p>
                 <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
@@ -272,7 +273,7 @@ async function route(event: Stripe.Event, res: VercelResponse) {
             html: `
               <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px">
                 <h2 style="color:#c0392b">サービスが停止されました</h2>
-                <p><strong>${league.name}</strong> のサービスが停止されました。</p>
+                <p><strong>${escapeHtml(league.name)}</strong> のサービスが停止されました。</p>
                 <p>現在のデータは<strong>30日間</strong>保持されます。再開をご希望の場合は、この期間内に <a href="mailto:support@leaguru.jp">support@leaguru.jp</a> までご連絡ください。データを引き継いで再開します。</p>
                 <p style="color:#666;font-size:13px">※ 申込フォームから新しくお申し込みいただくと、データの入っていない別のリーグになります。</p>
                 <p>30日を過ぎると、すべてのデータが完全に削除されます。</p>
@@ -590,12 +591,12 @@ async function route(event: Stripe.Event, res: VercelResponse) {
     html: `
       <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px">
         <h2 style="color:#1a6b3a">お申し込みありがとうございます！</h2>
-        <p>${contact} 様</p>
-        <p><strong>${leagueName}</strong> の管理画面が開設されました。</p>
+        <p>${escapeHtml(contact)} 様</p>
+        <p><strong>${escapeHtml(leagueName)}</strong> の管理画面が開設されました。</p>
         <p>管理画面の準備ができました。以下のURLとアカウント情報でログインしてください。</p>
         <div style="background:#f4f6fa;border-radius:8px;padding:16px 20px;margin:20px 0;font-size:14px">
           <p style="margin:0 0 8px"><strong>管理画面URL:</strong> <a href="https://${league.slug}.leaguru.jp/admin/login">https://${league.slug}.leaguru.jp/admin/login</a></p>
-          <p style="margin:0 0 8px"><strong>ログインメールアドレス:</strong> ${email}</p>
+          <p style="margin:0 0 8px"><strong>ログインメールアドレス:</strong> ${escapeHtml(email)}</p>
           ${passwordToSend
             ? `<p style="margin:0"><strong>仮パスワード:</strong> <span style="font-family:monospace;background:#e8f0e8;padding:2px 8px;border-radius:4px">${passwordToSend}</span></p>`
             : `<p style="margin:0"><strong>パスワード:</strong> このメールアドレスのアカウントはすでにお持ちです。今お使いのパスワードでログインできます。</p>`}
@@ -606,10 +607,10 @@ async function route(event: Stripe.Event, res: VercelResponse) {
           : `<p style="color:#888;font-size:13px">※パスワードをお忘れの場合は <a href="mailto:support@leaguru.jp">support@leaguru.jp</a> までご連絡ください。</p>`}
         <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
         <p style="color:#555;font-size:13px">
-          リーグ名: ${leagueName}<br>
-          担当者: ${contact}<br>
-          規模: ${size}<br>
-          ${phone ? `電話: ${phone}<br>` : ''}
+          リーグ名: ${escapeHtml(leagueName)}<br>
+          担当者: ${escapeHtml(contact)}<br>
+          規模: ${escapeHtml(size)}<br>
+          ${phone ? `電話: ${escapeHtml(phone)}<br>` : ''}
         </p>
         <p style="color:#aaa;font-size:12px">Leaguru サポート: support@leaguru.jp</p>
       </div>
