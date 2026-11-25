@@ -318,9 +318,11 @@
     {
       "keyword": "同得点",
       "angle": "検索クエリ「同得点」の意図にそのまま答える実用記事（GSC実クエリ由来）",
-      "done": false,
+      "done": true,
       "source": "gsc-auto",
-      "addedAt": "2026-11-16"
+      "addedAt": "2026-11-16",
+      "slug": "tie-score-standings-tiebreaker-rules",
+      "publishedAt": "2026-11-25"
     },
     {
       "keyword": "総得点",
