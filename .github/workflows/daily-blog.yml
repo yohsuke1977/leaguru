@@ -50,6 +50,7 @@ jobs:
 
       # 生成された記事とqueueをコミットして push（Vercelが自動でデプロイ）
       - name: Commit & push
+        id: push
         env:
           # タイトルは命令文に直接埋め込まない（「"」で止まる・`$(...)` が動くのを防ぐ。Issue #12）
           TITLE: ${{ steps.gen.outputs.title }}
@@ -84,6 +85,8 @@ jobs:
       # ⚠️ continue-on-error は付けない。失敗を飲み込むと「通知しているつもり」で
       #    静かに止まる。記事の公開自体はこの前のステップで終わっているので、
       #    ここが赤くなっても失うのは通知だけ。
+      # ⚠️ 前の Google の段が失敗しても動かす（書かないと「前の段が全部成功」が自動で付いて飛ばされる）。
+      #    公開の段の成功は必ず確かめる。always() だけにすると、未公開の URL を知らせてしまう（seo-tools#4）
       - name: Notify IndexNow
-        if: steps.gen.outputs.slug != ''
+        if: ${{ !cancelled() && steps.gen.outputs.slug != '' && steps.push.outcome == 'success' }}
         run: node scripts/notify-indexnow.mjs "https://leaguru.jp/blog/${{ steps.gen.outputs.slug }}" --key 98a4c22591aa52616a8e5fb1f4fb6e29
