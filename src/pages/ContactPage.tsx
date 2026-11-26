@@ -14,16 +14,21 @@ export default function ContactPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     setStatus('sending')
-    const res = await fetch('/api/contact', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ...form,
-        loadTime: loadTimeRef.current,
-        honeypot: honeypotRef.current?.value ?? '',
-      }),
-    })
-    setStatus(res.ok ? 'sent' : 'error')
+    // 電波が切れて送れないと fetch が例外になる。受け止めないとボタンが「送信中…」のまま止まる（#13）
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...form,
+          loadTime: loadTimeRef.current,
+          honeypot: honeypotRef.current?.value ?? '',
+        }),
+      })
+      setStatus(res.ok ? 'sent' : 'error')
+    } catch {
+      setStatus('error')
+    }
   }
 
   return (
@@ -34,7 +39,7 @@ export default function ContactPage() {
         担当者より<strong>2営業日以内</strong>にご返信いたします。
       </p>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.6fr', gap: 40, alignItems: 'start' }}>
+      <div className="contact-two-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1.6fr', gap: 40, alignItems: 'start' }}>
         <div>
           <div className="contact-channel" style={{ marginBottom: 20 }}>
             <span className="ic"><Icon name="megaphone" size={16} /></span>

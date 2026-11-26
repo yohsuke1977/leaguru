@@ -599,11 +599,19 @@ function ApplicationForm() {
     let attribution: Record<string, string> | null = null
     try { attribution = JSON.parse(sessionStorage.getItem('lg_attr') || 'null') } catch { /* 取れなくても申込は通す */ }
     ;(window as unknown as { gtag?: (...args: unknown[]) => void }).gtag?.('event', 'signup_submit', { page_path: location.pathname })
-    const res = await fetch('/api/checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...form, attribution }),
-    })
+    // 電波が切れて送れないと fetch が例外になる。受け止めないとボタンが止まったままになる（#13）
+    let res: Response
+    try {
+      res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...form, attribution }),
+      })
+    } catch {
+      setError('通信に失敗しました。電波の良いところでもう一度お試しください。')
+      setLoading(false)
+      return
+    }
     if (!res.ok) {
       // 受け口の言葉（URLが使えなくなった等）があればそれを出す
       const body = await res.json().catch(() => ({}))
@@ -611,7 +619,12 @@ function ApplicationForm() {
       setLoading(false)
       return
     }
-    const { url } = await res.json()
+    const { url } = await res.json().catch(() => ({ url: null }))
+    if (!url) {
+      setError('通信に失敗しました。電波の良いところでもう一度お試しください。')
+      setLoading(false)
+      return
+    }
     window.location.href = url
   }
   return (
