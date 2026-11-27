@@ -327,9 +327,11 @@
     {
       "keyword": "総得点",
       "angle": "検索クエリ「総得点」の意図にそのまま答える実用記事（GSC実クエリ由来）",
-      "done": false,
+      "done": true,
       "source": "gsc-auto",
-      "addedAt": "2026-11-16"
+      "addedAt": "2026-11-16",
+      "slug": "total-runs-scored-meaning-usage-standings",
+      "publishedAt": "2026-11-27"
     },
     {
       "keyword": "得失 点差 と は 野球",
