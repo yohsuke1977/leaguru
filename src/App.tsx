@@ -555,7 +555,7 @@ function ContactCTA() {
   )
 }
 
-type SlugStatus = 'idle' | 'checking' | 'available' | 'taken' | 'invalid' | 'reserved'
+type SlugStatus = 'idle' | 'checking' | 'available' | 'taken' | 'invalid' | 'reserved' | 'error'
 
 function ApplicationForm() {
   const [form, setForm] = useState({ leagueName: '', contact: '', email: '', phone: '', size: '', slug: '' })
@@ -563,19 +563,30 @@ function ApplicationForm() {
   const [error, setError] = useState('')
   const [slugStatus, setSlugStatus] = useState<SlugStatus>('idle')
   const slugTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // いま確かめている URL。返事が遅れて届いたとき、前に入れた URL の結果で表示を上書きしないため（#14）
+  const slugLatest = useRef('')
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
 
   const onSlugChange = (raw: string) => {
     const v = raw.toLowerCase().replace(/[^a-z0-9-]/g, '')
     set('slug', v)
+    slugLatest.current = v
     if (slugTimer.current) clearTimeout(slugTimer.current)
     if (!v) { setSlugStatus('idle'); return }
     if (!/^[a-z0-9][a-z0-9-]{1,18}[a-z0-9]$/.test(v)) { setSlugStatus('invalid'); return }
     setSlugStatus('checking')
     slugTimer.current = setTimeout(async () => {
-      const res = await fetch(`/api/check-slug?slug=${encodeURIComponent(v)}`)
-      const { available, reason } = await res.json()
-      setSlugStatus(available ? 'available' : (reason === 'reserved' ? 'reserved' : 'taken'))
+      // 通信やサーバーの失敗で「確認中...」のまま止まると、申込ボタンも押せないままになる（#14）
+      let next: SlugStatus
+      try {
+        const res = await fetch(`/api/check-slug?slug=${encodeURIComponent(v)}`)
+        if (!res.ok) throw new Error(`check-slug ${res.status}`)
+        const { available, reason } = await res.json()
+        next = available ? 'available' : (reason === 'reserved' ? 'reserved' : 'taken')
+      } catch {
+        next = 'error'
+      }
+      if (slugLatest.current === v) setSlugStatus(next)
     }, 600)
   }
 
@@ -586,6 +597,7 @@ function ApplicationForm() {
     taken:     <span style={{ color: '#ef4444', fontSize: 12 }}>✗ すでに使われています</span>,
     invalid:   <span style={{ color: '#ef4444', fontSize: 12 }}>✗ 英数字・ハイフンのみ、3〜20文字</span>,
     reserved:  <span style={{ color: '#ef4444', fontSize: 12 }}>✗ このURLは使用できません</span>,
+    error:     <span style={{ color: '#ef4444', fontSize: 12 }}>確認できませんでした。電波の良いところで入力し直してください</span>,
   }[slugStatus]
 
   // リーグ規模＝課金プラン。未選択のまま決済に進ませない

@@ -10,6 +10,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const problem = slugFormatProblem(slug)
   if (problem) return res.json({ available: false, reason: problem })
 
-  const { data } = await supabase.from('leagues').select('id').eq('slug', slug).maybeSingle()
+  const { data, error } = await supabase.from('leagues').select('id').eq('slug', slug).maybeSingle()
+  // 読めなかったときに「使えます」と答えない（#14）。画面は「確認できませんでした」を出す
+  if (error) {
+    console.error('check-slug 読み取り失敗:', error)
+    return res.status(500).json({ error: 'check failed' })
+  }
   return res.json({ available: !data })
 }
