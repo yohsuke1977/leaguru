@@ -193,6 +193,26 @@ async function route(event: Stripe.Event, res: VercelResponse) {
             `,
           }).catch(err => console.error('Payment failed email error:', err))
         }
+        // 運営にも知らせる（#15）。Stripe は数日おきにやり直し、そのたびに届くので1回目だけ。
+        // 知らせないと、気づくのは Stripe があきらめて停止の通知が来たとき（＝もう止まっている）
+        if ((invoice.attempt_count ?? 1) <= 1) {
+          await resend.emails.send({
+            from: 'noreply@leaguru.jp',
+            to: 'support@leaguru.jp',
+            subject: `【要対応】更新の支払いに失敗 — ${league.name}`,
+            text: [
+              '年額の支払いが失敗しました。Stripe が数日おきにやり直します（この通知は1回目だけ）。',
+              'カードの更新忘れなら、こちらから一声かけると解約を防げるかもしれません。',
+              '',
+              `リーグ: ${league.name}`,
+              `スラグ: ${league.slug}`,
+              `請求額: ¥${(invoice.amount_due ?? 0).toLocaleString('ja-JP')}`,
+              `試行回数: ${invoice.attempt_count ?? '不明'}`,
+              `お客さんへの通知: ${adminEmail ? `送信（${adminEmail}）` : '連絡先メール未設定のため送っていない'}`,
+              `請求書: ${invoice.hosted_invoice_url ?? 'なし'}`,
+            ].join('\n'),
+          }).catch(err => console.error('Admin payment failed notify error:', err))
+        }
       }
     }
     return res.json({ received: true })
@@ -317,6 +337,12 @@ async function route(event: Stripe.Event, res: VercelResponse) {
           const priceId = process.env[target.envKey]
           if (!priceId) {
             console.error(`更新時の帯見直し: Stripe Price 未設定 ${target.envKey}（league ${league.id}）`)
+            await resend.emails.send({
+              from: 'noreply@leaguru.jp',
+              to: 'support@leaguru.jp',
+              subject: `【要対応】料金帯を変えられなかった — ${league.name}`,
+              text: `更新前の料金帯の見直しで ${league.plan}→${target.key} にするはずが、Vercel の環境変数 ${target.envKey}（Stripe Price）が未設定で変えられませんでした。\n今の料金帯のまま更新されます。\n\nリーグ: ${league.name}（id ${league.id}）\n直近のチーム数: ${teams}`,
+            }).catch(err => console.error('Admin plan notify error:', err))
           } else {
             const sub = await stripe.subscriptions.retrieve(league.stripe_subscription_id)
             const item = sub.items.data[0]
@@ -330,6 +356,20 @@ async function route(event: Stripe.Event, res: VercelResponse) {
               const { error: pErr } = await supabase.from('leagues').update({ plan: target.key }).eq('id', league.id)
               check(pErr, '料金帯の記録')
               console.log(`更新時の帯見直し: ${league.name} ${league.plan}→${target.key}（直近${teams}チーム）`)
+              // 運営に知らせる（#15）。上げる方向はお客さんに知らせないまま高い金額で請求することになるので【要確認】
+              const up = target.price > PLAN_BY_KEY[league.plan].price
+              await resend.emails.send({
+                from: 'noreply@leaguru.jp',
+                to: 'support@leaguru.jp',
+                subject: `${up ? '【要確認】料金帯を上げた' : '【お知らせ】料金帯を下げた'} — ${league.name} ${league.plan}→${target.key}`,
+                text: [
+                  `更新前の見直しで料金帯を ${league.plan}（${PLAN_BY_KEY[league.plan].priceLabel}）→ ${target.key}（${target.priceLabel}）に変えました。次の更新からこの金額で請求されます。`,
+                  up ? 'お客さんには知らせていません。上げる方向は通常起きない（上限超過は管理画面で止めている）ので、事情を確かめてください。' : '',
+                  '',
+                  `リーグ: ${league.name}（id ${league.id}）`,
+                  `直近のチーム数: ${teams}`,
+                ].filter(Boolean).join('\n'),
+              }).catch(err => console.error('Admin plan notify error:', err))
             }
           }
         } else {
